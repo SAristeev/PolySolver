@@ -1,10 +1,11 @@
 #include"Kernel.h"
 #include<iostream>
+#include<map>
 #include<cusparse.h>
 
 
 
-
+namespace KERNEL {
 
 #if defined(_WIN32)
 #if !defined(WIN32_LEAN_AND_MEAN)
@@ -44,14 +45,22 @@
 		return (double)tv.tv_sec + (double)tv.tv_usec / 1000000.0;
 	}
 #endif
-	ProblemCase::ProblemCase(std::string CN, SPARSE::SolverID SID) {
-		CaseName = CN;
+
+	void InitLinearSolvers(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>& LinearFactory) {
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERSP>(SPARSE::SolverID::cuSOLVERSP);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF>(SPARSE::SolverID::cuSOLVERRF);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF0>(SPARSE::SolverID::cuSOLVERRF0);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF_ALLGPU>(SPARSE::SolverID::cuSOLVERRF_ALLGPU);
 		LinearFactory.add<SPARSE::LinearSolverAMGX>(SPARSE::SolverID::AMGX);
+	}
+	
+	void setSettingsFromJSON(json config);
+
+	ProblemCase::ProblemCase(std::string CN, SPARSE::SolverID SID) {
+		CaseName = CN;
+		InitLinearSolvers(LinearFactory);
 		LinearSolvers.insert({ LinearFactory.get(SID), SID });
+		
 		std::string path = "C:/WorkDirectory/Cases/" + CN;
 		A.freadCSR(path + "/A.txt");
 		b.AddData(path + "/B.vec");
@@ -59,19 +68,19 @@
 		{
 			b.AddData(path + "/B" + std::to_string(i + 1) + ".vec");
 		}
-
 	}
-	ProblemCase::ProblemCase(std::string CN) {
-		std::ifstream file(CN);
-		data = json::parse(file);
-		for (auto x : data["solvers"]) {
-			std::cout << x << std::endl;
+	ProblemCase::ProblemCase(std::string ConfigName) {
+		std::ifstream file(ConfigName);
+		config = json::parse(file);
+		InitLinearSolvers(LinearFactory);
+		for (auto solver : config["LinearProblem"]["solvers"]) {
+			AddLinearImplementation(LinearSolvers, LinearFactory, solver);
 		}
-		//std::cout << data["solvers"] << std::endl;
+		setSettingsFromJSON(config);
 	}
-	void ProblemCase::Check(double &absnorm1, double & absnorm2, double & absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {
+	void ProblemCase::Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {
 		int n, nnzA;
-		
+
 		int* h_RowsA = nullptr; // GPU <int>    n+1
 		int* h_ColsA = nullptr; // GPU <int>    nnzA
 		double* h_ValsA = nullptr; // GPU <double> nnzA 
@@ -135,10 +144,10 @@
 
 
 
-		
 
 
-	
+
+
 		cusparseDestroy(cusparseH);
 		absnorm1 = 0, absnorm2 = 0, absnorminf = 0;
 		for (int i = 0; i < n; i++) {
@@ -163,8 +172,11 @@
 		relnorminf = absnorminf / relnorminf;
 
 		if (h_r) { free(h_r); }
-		
+
 	}
 	void ProblemCase::print() {
 
 	}
+
+
+}

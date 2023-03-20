@@ -15,6 +15,8 @@ namespace SPARSE {
 		ALL = 99
 	};
 	std::string SolverID2String(SolverID ID);
+	
+
 
 
 	class LinearSolver {
@@ -91,6 +93,8 @@ namespace SPARSE {
 		}
 	};
 
+
+	void AddLinearImplementation(std::map<LinearSolver*, SolverID>& LinearSolvers, ObjectSolverFactory<LinearSolver, SolverID>& LinearFactory, std::string solver);
 
 
 }

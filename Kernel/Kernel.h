@@ -9,7 +9,7 @@
 #include "../SparseAPI/LinearSolver/LinearSolver_AMGX.h"
 #include "../SparseAPI/LinearSolver/LinearSolver_cuSOLVER.h"
 
-double second();
+
 
 //class Config {
 //private:
@@ -32,48 +32,56 @@ double second();
 //	std::vector<SPARSE::SolverID>::iterator GetLastID() { return solvers.end(); }
 //
 //};
+namespace KERNEL {
+	double second();
 
-using json = nlohmann::json;
+	using json = nlohmann::json;
+	void InitLinearSolvers(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> &LinearFactory);
+	void AddLinearImplementation(std::map<SPARSE::LinearSolver*, SPARSE::SolverID> &LinearSolvers, std::string solver);
+	//void AddEigenImplementation(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>& LinearFactory);
+	
+	
 
-class ProblemCase 
-{
-private:
-	json data;
-	std::string CaseName;
-	SPARSE::SparseMatrix A;
-	SPARSE::SparseVector b;
-	SPARSE::SparseVector x;
-	std::map<SPARSE::LinearSolver*, SPARSE::SolverID> LinearSolvers;
-	SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> LinearFactory;
-
-public:
-	ProblemCase(std::string CN, SPARSE::SolverID SID);
-	ProblemCase(std::string CN);
-	void loadconfig(std::string CN) {
-		std::ifstream file(CN);
-		data = json::parse(file);
-		for (auto x : data["solvers"]) {
-			std::cout << x << std::endl;
-		}
-	}
-	void start(double &time) {
-
-		double start, stop;
-		for (auto solver: LinearSolvers) {
-			start = second();
-			solver.first->SolveRightSide(A, b, x);
-			stop = second();
-			std::string SolverName = SPARSE::SolverID2String(solver.second);
-			std::string destPath = "C:/WorkDirectory/Cases/X_";
-			if(1){
-				x.fprint(0, destPath + SolverName + ".txt");
+	class ProblemCase
+	{
+	private:
+		json config;
+		std::string CaseName;
+		SPARSE::SparseMatrix A;
+		SPARSE::SparseVector b;
+		SPARSE::SparseVector x;
+		std::map<SPARSE::LinearSolver*, SPARSE::SolverID> LinearSolvers;
+		SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> LinearFactory;
+	public:
+		ProblemCase(std::string CN, SPARSE::SolverID SID);
+		ProblemCase(std::string CN);
+		void loadconfig(std::string CN) {
+			std::ifstream file(CN);
+			config = json::parse(file);
+			for (auto x : config["LinearProblem"]["solvers"]) {
+				std::cout << x << std::endl;
 			}
 		}
-		time = stop - start;
-	}
+		void start(double& time) {
 
-	void Check(double & absnorm1, double & absnorm2, double &absnorminf,double& relnorm1, double& relnorm2, double& relnorminf);
-	void print();
-};
+			double start, stop;
+			for (auto solver : LinearSolvers) {
+				start = second();
+				solver.first->SolveRightSide(A, b, x);
+				stop = second();
+				std::string SolverName = SPARSE::SolverID2String(solver.second);
+				std::string destPath = "C:/WorkDirectory/Cases/X_";
+				if (1) {
+					x.fprint(0, destPath + SolverName + ".txt");
+				}
+			}
+			time = stop - start;
+		}
+
+		void Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
+		void print();
+	};
 
 
+
+}

@@ -5,13 +5,14 @@
 
 int main(int argc, char** argv)
 {
-
+    using namespace KERNEL;
     std::string CaseName("5x5");
     
-    ProblemCase Case(CaseName, SPARSE::SolverID::AMGX);
+    //ProblemCase Case(CaseName, SPARSE::SolverID::AMGX);
     double time = 0;
     //Case.start(time);
-    Case.loadconfig("C:/WorkDirectory/PolySolver_build/Debug/config.json");
+    //Case.loadconfig("C:/WorkDirectory/PolySolver_build/Debug/config.json");
+    ProblemCase Case("C:/WorkDirectory/PolySolver_build/Debug/config.json");
     std::cout << "Solve time: " << time << std::endl;
 
     /*double absnorm1, absnorm2, absnorminf;

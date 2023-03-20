@@ -1,5 +1,8 @@
 #include "LinearSolver_IMPL.h"
+#include <unordered_map>
 namespace SPARSE {
+
+	
 
 	std::string SolverID2String(SolverID ID) {
 		switch (ID)
@@ -17,8 +20,6 @@ namespace SPARSE {
 		}
 	}
 
-
-
 	int LinearSolver::IsReadyToSolve() {
 		return 1;
 	}
@@ -28,4 +29,14 @@ namespace SPARSE {
 		SparseVector x) {
 		return IsReadyToSolve();
 	}
+	void AddLinearImplementation(std::map<LinearSolver*, SolverID>& LinearSolvers, ObjectSolverFactory<LinearSolver, SolverID> &LinearFactory, std::string solver) {
+		static std::unordered_map<std::string, SolverID> const table = { {"cuSOLVER",SolverID::cuSOLVERRF_ALLGPU}, {"AMGX",SolverID::AMGX} };
+		auto it = table.find(solver);
+		SolverID SID;
+		if (it != table.end()) {
+			SID = it->second;
+		}
+		LinearSolvers.insert({ LinearFactory.get(SID), SID });
+	}
+
 }
