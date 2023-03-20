@@ -1,4 +1,5 @@
 #include<iostream>
+#include<cstdlib>
 #include"Kernel/Kernel.h"
 #include"SparseAPI/SparseAPI.h"
 
@@ -10,11 +11,9 @@ int main(int argc, char** argv)
     
     //ProblemCase Case(CaseName, SPARSE::SolverID::AMGX);
     double time = 0;
-    //Case.start(time);
-    //Case.loadconfig("C:/WorkDirectory/PolySolver_build/Debug/config.json");
     ProblemCase Case("C:/WorkDirectory/PolySolver_build/Debug/config.json");
     std::cout << "Solve time: " << time << std::endl;
-
+    
     /*double absnorm1, absnorm2, absnorminf;
     double relnorm1, relnorm2, relnorminf;
     Case.Check(absnorm1, absnorm2, absnorminf, relnorm1, relnorm2, relnorminf);

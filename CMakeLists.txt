@@ -39,7 +39,10 @@ if(USE_AMGX)
 	endif(MPI_FOUND)
 endif(USE_AMGX)
 
+
+
 add_executable(PolySolver "PolySolver.cpp")
+
 
 target_include_directories(PolySolver PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 

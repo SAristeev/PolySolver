@@ -52,16 +52,12 @@ namespace KERNEL {
 		SPARSE::SparseVector x;
 		std::map<SPARSE::LinearSolver*, SPARSE::SolverID> LinearSolvers;
 		SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> LinearFactory;
+		int n_rhs;
+		double time;
 	public:
 		ProblemCase(std::string CN, SPARSE::SolverID SID);
 		ProblemCase(std::string CN);
-		void loadconfig(std::string CN) {
-			std::ifstream file(CN);
-			config = json::parse(file);
-			for (auto x : config["LinearProblem"]["solvers"]) {
-				std::cout << x << std::endl;
-			}
-		}
+		void setSettings();
 		void start(double& time) {
 
 			double start, stop;

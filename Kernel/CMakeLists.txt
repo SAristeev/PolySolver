@@ -8,8 +8,8 @@ file(GLOB Kernel_HDRS_ *.h *.hpp)
 set(Kernel_SRSC ${Kernel_SRSC_})
 set(Kernel_HDRS ${Kernel_HDRS_})
 
-add_library(Kernel ${Kernel_SRSC} ${Kernel_HDRS})
 
+add_library(Kernel ${Kernel_SRSC} ${Kernel_HDRS})
 
 
 target_include_directories(Kernel PRIVATE ${CUDAToolkit_INCLUDE_DIRS})

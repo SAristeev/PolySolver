@@ -76,7 +76,11 @@ namespace KERNEL {
 		for (auto solver : config["LinearProblem"]["solvers"]) {
 			AddLinearImplementation(LinearSolvers, LinearFactory, solver);
 		}
-		setSettingsFromJSON(config);
+		std::string path(config["LinearProblem"]["case_path"]);
+		std::string name(config["LinearProblem"]["case_name"]);
+		A.freadCSR(path + "/" + name + "/A.txt");
+		b.AddData(path + "/" + name + "/B.txt");
+		n_rhs = config["LinearProblem"]["n_rhs"];
 	}
 	void ProblemCase::Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {
 		int n, nnzA;
