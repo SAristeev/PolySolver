@@ -56,8 +56,8 @@ namespace KERNEL {
 	
 	void setSettingsFromJSON(json config);
 
-	ProblemCase::ProblemCase(std::string CN, SPARSE::SolverID SID) {
-		CaseName = CN;
+	/*ProblemCase::ProblemCase(std::string CN, SPARSE::SolverID SID) {
+		settings.CaseName = CN;
 		InitLinearSolvers(LinearFactory);
 		LinearSolvers.insert({ LinearFactory.get(SID), SID });
 		
@@ -68,7 +68,7 @@ namespace KERNEL {
 		{
 			b.AddData(path + "/B" + std::to_string(i + 1) + ".vec");
 		}
-	}
+	}*/
 	ProblemCase::ProblemCase(std::string ConfigName) {
 		std::ifstream file(ConfigName);
 		config = json::parse(file);
@@ -80,8 +80,28 @@ namespace KERNEL {
 		std::string name(config["LinearProblem"]["case_name"]);
 		A.freadCSR(path + "/" + name + "/A.txt");
 		b.AddData(path + "/" + name + "/B.txt");
-		n_rhs = config["LinearProblem"]["n_rhs"];
+		settings.n_rhs = config["LinearProblem"]["n_rhs"];
+		settings.print_answer = config["LinearProblem"]["print_answer"];
+		settings.check_answer = config["LinearProblem"]["check_answer"];
 	}
+
+
+	void ProblemCase::start() {
+		double start, stop;
+		start = second();
+		for (auto solver : LinearSolvers) {
+
+			solver.first->SolveRightSide(A, b, x);
+			std::string SolverName = SPARSE::SolverID2String(solver.second);
+			std::string destPath = "C:/WorkDirectory/Cases/X_";
+			if (1) {
+				x.fprint(0, destPath + SolverName + ".txt");
+			}
+		}
+		stop = second();
+		settings.time = stop - start;
+	}
+	
 	void ProblemCase::Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {
 		int n, nnzA;
 

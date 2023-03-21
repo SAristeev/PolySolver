@@ -40,40 +40,34 @@ namespace KERNEL {
 	void AddLinearImplementation(std::map<SPARSE::LinearSolver*, SPARSE::SolverID> &LinearSolvers, std::string solver);
 	//void AddEigenImplementation(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>& LinearFactory);
 	
-	
+	struct Settings {
+		std::string CaseName;
+		int n_rhs;
+		double time;
+		double absnorm1, absnorm2, absnorminf;
+		double relnorm1, relnorm2, relnorminf;
+
+		bool print_answer;
+		bool check_answer;
+	};
 
 	class ProblemCase
 	{
 	private:
 		json config;
-		std::string CaseName;
 		SPARSE::SparseMatrix A;
 		SPARSE::SparseVector b;
 		SPARSE::SparseVector x;
 		std::map<SPARSE::LinearSolver*, SPARSE::SolverID> LinearSolvers;
 		SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> LinearFactory;
-		int n_rhs;
-		double time;
+		Settings settings;
 	public:
-		ProblemCase(std::string CN, SPARSE::SolverID SID);
+		//ProblemCase(std::string CN, SPARSE::SolverID SID);
 		ProblemCase(std::string CN);
 		void setSettings();
-		void start(double& time) {
-
-			double start, stop;
-			for (auto solver : LinearSolvers) {
-				start = second();
-				solver.first->SolveRightSide(A, b, x);
-				stop = second();
-				std::string SolverName = SPARSE::SolverID2String(solver.second);
-				std::string destPath = "C:/WorkDirectory/Cases/X_";
-				if (1) {
-					x.fprint(0, destPath + SolverName + ".txt");
-				}
-			}
-			time = stop - start;
-		}
-
+		//void start(double& time);
+		void start();
+		//void start();
 		void Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
 		void print();
 	};
