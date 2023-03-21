@@ -196,7 +196,7 @@ namespace SPARSE{
 
 		for (int i = 0; i < this->n; i++)
 		{	
-			file << std::format("{:.20e}", Vals[i + n - 1]);
+			file << std::format("{:.20e}", Vals[i + n]); // with zero
 			if (i != this->n - 1) {
 				file << std::endl;
 			}

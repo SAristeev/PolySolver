@@ -41,9 +41,14 @@ namespace KERNEL {
 	//void AddEigenImplementation(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>& LinearFactory);
 	
 	struct Settings {
-		std::string CaseName;
+		std::string caseName;
+		std::string casePath;
+		std::vector<std::string> solversName;
+
 		int n_rhs;
-		double time;
+		std::vector<double> time;
+		//double time;
+
 		double absnorm1, absnorm2, absnorminf;
 		double relnorm1, relnorm2, relnorminf;
 
@@ -58,6 +63,7 @@ namespace KERNEL {
 		SPARSE::SparseMatrix A;
 		SPARSE::SparseVector b;
 		SPARSE::SparseVector x;
+		SPARSE::SparseVector r;
 		std::map<SPARSE::LinearSolver*, SPARSE::SolverID> LinearSolvers;
 		SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> LinearFactory;
 		Settings settings;

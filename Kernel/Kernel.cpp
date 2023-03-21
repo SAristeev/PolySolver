@@ -56,30 +56,20 @@ namespace KERNEL {
 	
 	void setSettingsFromJSON(json config);
 
-	/*ProblemCase::ProblemCase(std::string CN, SPARSE::SolverID SID) {
-		settings.CaseName = CN;
-		InitLinearSolvers(LinearFactory);
-		LinearSolvers.insert({ LinearFactory.get(SID), SID });
-		
-		std::string path = "C:/WorkDirectory/Cases/" + CN;
-		A.freadCSR(path + "/A.txt");
-		b.AddData(path + "/B.vec");
-		for (int i = 1; i <= 4; i++)
-		{
-			b.AddData(path + "/B" + std::to_string(i + 1) + ".vec");
-		}
-	}*/
+	
 	ProblemCase::ProblemCase(std::string ConfigName) {
 		std::ifstream file(ConfigName);
 		config = json::parse(file);
 		InitLinearSolvers(LinearFactory);
 		for (auto solver : config["LinearProblem"]["solvers"]) {
 			AddLinearImplementation(LinearSolvers, LinearFactory, solver);
+			settings.solversName.push_back(solver);
 		}
-		std::string path(config["LinearProblem"]["case_path"]);
-		std::string name(config["LinearProblem"]["case_name"]);
-		A.freadCSR(path + "/" + name + "/A.txt");
-		b.AddData(path + "/" + name + "/B.txt");
+		settings.caseName = config["LinearProblem"]["case_name"];
+		settings.casePath = config["LinearProblem"]["case_path"];
+		
+		A.freadCSR(settings.casePath + "/" + settings.caseName + "/A.txt");
+		b.AddData(settings.casePath + "/" + settings.caseName + "/B.vec");
 		settings.n_rhs = config["LinearProblem"]["n_rhs"];
 		settings.print_answer = config["LinearProblem"]["print_answer"];
 		settings.check_answer = config["LinearProblem"]["check_answer"];
@@ -88,18 +78,27 @@ namespace KERNEL {
 
 	void ProblemCase::start() {
 		double start, stop;
-		start = second();
+		size_t cur = 0;
 		for (auto solver : LinearSolvers) {
-
+			start = second();
 			solver.first->SolveRightSide(A, b, x);
-			std::string SolverName = SPARSE::SolverID2String(solver.second);
-			std::string destPath = "C:/WorkDirectory/Cases/X_";
-			if (1) {
-				x.fprint(0, destPath + SolverName + ".txt");
+			stop = second();
+			if (settings.print_answer) {
+				std::string SolverName = SolverID2String(solver.second);
+				x.fprint(cur, settings.casePath + "/" + settings.caseName + "/X_" + SolverName + "_.txt");
 			}
+			if (settings.check_answer) {
+				//TO DO:
+				//std::string SolverName = SolverID2String(solver.second);
+				//r.fprint(cur, settings.casePath + "/" + settings.caseName + "/R_" + SolverName + "_.txt");
+			}
+			cur++;
+			settings.time.push_back(stop - start);
 		}
-		stop = second();
-		settings.time = stop - start;
+
+		
+
+		
 	}
 	
 	void ProblemCase::Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {

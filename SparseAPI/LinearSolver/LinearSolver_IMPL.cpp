@@ -30,7 +30,7 @@ namespace SPARSE {
 		return IsReadyToSolve();
 	}
 	void AddLinearImplementation(std::map<LinearSolver*, SolverID>& LinearSolvers, ObjectSolverFactory<LinearSolver, SolverID> &LinearFactory, std::string solver) {
-		static std::unordered_map<std::string, SolverID> const table = { {"cuSOLVER",SolverID::cuSOLVERRF_ALLGPU}, {"AMGX",SolverID::AMGX} };
+		static std::unordered_map<std::string, SolverID> const table = { {"cuSOLVER",SolverID::cuSOLVERSP}, {"AMGX",SolverID::AMGX} };
 		auto it = table.find(solver);
 		SolverID SID;
 		if (it != table.end()) {

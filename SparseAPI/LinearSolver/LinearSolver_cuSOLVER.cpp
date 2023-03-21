@@ -55,7 +55,7 @@ namespace SPARSE {
 
 		
 
-		free(h_x); h_x = nullptr;
+		//free(h_x); h_x = nullptr;
 		return 0;
 	}
 
