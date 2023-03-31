@@ -72,6 +72,7 @@ namespace KERNEL {
 		A.freadCSR(settings.casePath + "/" + settings.caseName + "/A.txt");
 		b.AddData(settings.casePath + "/" + settings.caseName + "/B.vec");
 
+		//TODO n_rhs enable
 		settings.n_rhs = config["LinearProblem"]["n_rhs"];
 		settings.print_answer = config["LinearProblem"]["print_answer"];
 		settings.print_time = config["LinearProblem"]["print_time"];

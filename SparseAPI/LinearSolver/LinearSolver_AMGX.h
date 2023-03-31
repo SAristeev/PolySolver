@@ -12,6 +12,7 @@ namespace SPARSE {
 		uint64_t max_iter;
 		double tolerance;
 	};
+
 	class LinearSolverAMGX : public LinearSolver {
 		int		n;
 		int		nnzA;
@@ -27,7 +28,9 @@ namespace SPARSE {
 		double* d_ValsA = nullptr; // CPU <double> nnzA 
 		double* d_x = nullptr; // GPU <double> n
 		double* d_b = nullptr; // CPU <double> n
-		Settings_AMGX settings;
+
+		Settings_AMGX settings;// TODO: make many configs starts
+		//TODO: delete mpi
 	public:
 		LinearSolverAMGX(): LinearSolver("AMGX") {}
 		int SolveRightSide(SparseMatrix& A,
