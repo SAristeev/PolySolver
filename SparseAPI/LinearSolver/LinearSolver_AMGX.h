@@ -1,6 +1,5 @@
 #pragma once
 #include "LinearSolver_IMPL.h"
-#include <mpi.h>
 #include <amgx_c.h>
 #include <amgx_config.h>
 #include <cuda_runtime.h>

@@ -33,10 +33,6 @@ endif(USE_GINKGO)
 
 if(USE_AMGX)
 	message("FIND AMGX: " $ENV{AMGX_DIR})
-	find_package(MPI)
-	if(MPI_FOUND)
-		message("     MPI_INCLUDE_PATH: " ${MPI_INCLUDE_PATH})
-	endif(MPI_FOUND)
 endif(USE_AMGX)
 
 
@@ -50,9 +46,6 @@ target_include_directories(PolySolver PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 if(USE_AMGX)
 	target_include_directories(PolySolver PRIVATE "$ENV{AMGX_DIR}/include")
 	target_link_libraries(PolySolver PRIVATE "$ENV{AMGX_DIR}/lib/amgxsh.lib")
-	if(MPI_FOUND)
-		target_include_directories(PolySolver PRIVATE "${MPI_INCLUDE_PATH}")
-	endif(MPI_FOUND)
 endif(USE_AMGX)
 
 

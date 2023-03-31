@@ -4,7 +4,6 @@
 #include<vector>
 #include<string>
 #include<format>
-#include <mpi.h>
 #include <cuda_runtime.h>
 #include <cusolverSp.h>
 #include <cusparse.h>
