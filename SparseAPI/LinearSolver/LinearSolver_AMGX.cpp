@@ -22,22 +22,8 @@ namespace SPARSE {
 
         //status handling
         AMGX_SOLVE_STATUS status;
-        //MPI (with CUDA GPUs)
-
-        int rank = 0;
-        int lrank = 0;
-        int nranks = 0;
-        int gpu_count = 0;
-
-        MPI_Comm mpi_comm = MPI_COMM_WORLD;
-        MPI_Init(0, NULL);
-        MPI_Comm_size(mpi_comm, &nranks);
-        MPI_Comm_rank(mpi_comm, &rank);
-
-        gpuErrchk(cudaGetDeviceCount(&gpu_count));
-        lrank = rank % gpu_count;
-        gpuErrchk(cudaSetDevice(lrank));
-
+        
+        
         A.GetInfo(n, nnzA);
         A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
         b.GetData(&h_b);
@@ -50,10 +36,10 @@ namespace SPARSE {
             return -1;
         }
 
-        int64_t* h_ColsA64_t = (int64_t*)malloc(nnzA * sizeof(int64_t));
+        /*int64_t* h_ColsA64_t = (int64_t*)malloc(nnzA * sizeof(int64_t));
         for (int i = 0; i < nnzA; i++) {
             h_ColsA64_t[i] = h_ColsA[i];
-        }
+        }*/
 
         int block_dimx = 1, block_dimy = 1, block_size;
         
@@ -70,7 +56,7 @@ namespace SPARSE {
         
 
 
-        AMGX_resources_create(&rsrc, cfg, &mpi_comm, 1, &lrank);
+        AMGX_resources_create_simple(&rsrc, cfg);
         AMGX_matrix_create(&_A, rsrc, mode);
         AMGX_vector_create(&_x, rsrc, mode);
         AMGX_vector_create(&_b, rsrc, mode);
@@ -87,38 +73,38 @@ namespace SPARSE {
 
         AMGX_SAFE_CALL(AMGX_pin_memory(h_x, n * block_dimx * sizeof(double)));
         AMGX_SAFE_CALL(AMGX_pin_memory(h_b, n * block_dimx * sizeof(double)));
-        AMGX_SAFE_CALL(AMGX_pin_memory(h_ColsA64_t, nnzA * sizeof(int64_t)));
+        AMGX_SAFE_CALL(AMGX_pin_memory(h_ColsA, nnzA * sizeof(int)));
         AMGX_SAFE_CALL(AMGX_pin_memory(h_RowsA, (n + 1) * sizeof(int)));
         AMGX_SAFE_CALL(AMGX_pin_memory(h_ValsA, nnzA * block_size * sizeof(double)));
 
-        int64_t nlocal64 = n / nranks;
-        int last = n % nranks;
+        //int64_t nlocal64 = n / nranks;
+        //int last = n % nranks;
 
-        if (rank <= last - 1) {
-            nlocal64++;
-        }
-        int64_t* partition_offsets64 = (int64_t*)malloc((nranks + 1) * sizeof(int64_t));
-        int* partition_offsets = (int*)malloc((nranks + 1) * sizeof(int));
-        partition_offsets64[0] = 0;
-        
-        
-        int* locals = (int*)malloc(nranks * sizeof(int));
-        locals[0] = int(nlocal64);
-        MPI_Allgather(&nlocal64, 1, MPI_INT64_T, &partition_offsets64[1], 1, MPI_INT64_T, mpi_comm);
-        for (int i = 2; i < nranks + 1; ++i) {
-            partition_offsets64[i] += partition_offsets64[i - 1];
-            locals[i - 1] = partition_offsets64[i] - partition_offsets64[i - 1];
+        //if (rank <= last - 1) {
+        //    nlocal64++;
+        //}
+        //int64_t* partition_offsets64 = (int64_t*)malloc((nranks + 1) * sizeof(int64_t));
+        //int* partition_offsets = (int*)malloc((nranks + 1) * sizeof(int));
+        //partition_offsets64[0] = 0;
+        //
+        //
+        //int* locals = (int*)malloc(nranks * sizeof(int));
+        //locals[0] = int(nlocal64);
+        //MPI_Allgather(&nlocal64, 1, MPI_INT64_T, &partition_offsets64[1], 1, MPI_INT64_T, mpi_comm);
+        //for (int i = 2; i < nranks + 1; ++i) {
+        //    partition_offsets64[i] += partition_offsets64[i - 1];
+        //    locals[i - 1] = partition_offsets64[i] - partition_offsets64[i - 1];
 
-        }
-        locals[1] = partition_offsets64[2] - partition_offsets64[1];
-        int nglobal = partition_offsets64[nranks]; // last element always has global number of rows
+        //}
+        //locals[1] = partition_offsets64[2] - partition_offsets64[1];
+        //int nglobal = partition_offsets64[nranks]; // last element always has global number of rows
 
-        AMGX_distribution_handle dist;
-        AMGX_distribution_create(&dist, cfg);
-        AMGX_distribution_set_partition_data(dist, AMGX_DIST_PARTITION_OFFSETS, partition_offsets64);
-        AMGX_matrix_upload_distributed(_A, nglobal, int(nlocal64), nnzA, block_dimx, block_dimy, h_RowsA, h_ColsA64_t, h_ValsA, NULL, dist);
-        AMGX_distribution_destroy(dist);
-        
+        //AMGX_distribution_handle dist;
+        //AMGX_distribution_create(&dist, cfg);
+        //AMGX_distribution_set_partition_data(dist, AMGX_DIST_PARTITION_OFFSETS, partition_offsets64);
+        //AMGX_matrix_upload_distributed(_A, nglobal, int(nlocal64), nnzA, block_dimx, block_dimy, h_RowsA, h_ColsA64_t, h_ValsA, NULL, dist);
+        //AMGX_distribution_destroy(dist);
+        AMGX_matrix_upload_all(_A, n, nnzA, 1, 1, h_RowsA, h_ColsA, h_ValsA, nullptr);
         
 
 
@@ -128,18 +114,18 @@ namespace SPARSE {
         AMGX_vector_upload(_b, n, block_dimx, h_b);
         AMGX_vector_set_zero(_x, n, block_dimx);
 
-        MPI_Barrier(mpi_comm);
+        //MPI_Barrier(mpi_comm);
         
         AMGX_solver_setup(solver, _A);
         AMGX_solver_solve(solver, _b, _x);
-        MPI_Barrier(mpi_comm);
+        //MPI_Barrier(mpi_comm);
         
         AMGX_solver_get_status(solver, &status);
 
 
         AMGX_vector_download(_x,h_x);
 
-        MPI_Barrier(mpi_comm);
+        /*MPI_Barrier(mpi_comm);
         for (int i = 0; i < nranks + 1; i++) {
             partition_offsets[i] = partition_offsets64[i];
         }
@@ -148,11 +134,11 @@ namespace SPARSE {
      
         
         free(partition_offsets64);
-        free(partition_offsets);
-        MPI_Barrier(mpi_comm);
+        free(partition_offsets);*/
+        //MPI_Barrier(mpi_comm);
         AMGX_unpin_memory(h_x);
         AMGX_unpin_memory(h_b);
-        AMGX_unpin_memory(h_ColsA64_t);
+        AMGX_unpin_memory(h_ColsA);
         AMGX_unpin_memory(h_RowsA);
         AMGX_unpin_memory(h_ValsA);
         /*std::string FileName("err_");
@@ -184,7 +170,7 @@ namespace SPARSE {
         /* shutdown and exit */
         AMGX_SAFE_CALL(AMGX_finalize());
 
-        MPI_Finalize();
+        //MPI_Finalize();
         gpuErrchk(cudaDeviceReset());
         return 0;
 	}
