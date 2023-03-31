@@ -43,6 +43,7 @@ namespace KERNEL {
 	struct Settings {
 		std::string caseName;
 		std::string casePath;
+		std::string resFileName;
 		std::vector<std::string> solversName;
 
 		int n_rhs;
@@ -53,7 +54,10 @@ namespace KERNEL {
 		double relnorm1, relnorm2, relnorminf;
 
 		bool print_answer;
+		bool print_time;
+		bool print_to_file;
 		bool check_answer;
+
 	};
 
 	class ProblemCase
@@ -70,7 +74,8 @@ namespace KERNEL {
 	public:
 		//ProblemCase(std::string CN, SPARSE::SolverID SID);
 		ProblemCase(std::string CN);
-		void setSettings();
+		// TODO: create setSettings()
+		// void setSettings();
 		//void start(double& time);
 		void start();
 		//void start();

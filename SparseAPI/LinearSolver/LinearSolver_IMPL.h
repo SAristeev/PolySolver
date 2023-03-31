@@ -1,11 +1,13 @@
 #pragma once
 #include<map>
 #include"../SparseAPI.h"
-
+#include"../../Kernel/json.hpp"
 
 
 namespace SPARSE {
-	
+
+	using json = nlohmann::json;
+
 	enum class SolverID {
 		cuSOLVERSP = 1,
 		cuSOLVERRF = 2,
@@ -20,7 +22,11 @@ namespace SPARSE {
 
 
 	class LinearSolver {
+		std::string solverName;
 	public:
+		LinearSolver(std::string SN) { solverName = SN; }
+		std::string getName() { return solverName; }
+		virtual int SetSettingsFromJSON(json settings) = 0;
 		virtual int SolveRightSide(SparseMatrix &A,
 			SparseVector  &b,
 			SparseVector  &x) = 0;

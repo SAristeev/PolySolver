@@ -1,13 +1,12 @@
 #include "LinearSolver_AMGX.h"
 
 namespace SPARSE {
-    void print_callback(const char* msg, int length)
-    {
-        int rank;
-        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-        if (rank == 0) { printf("%s", msg); }
-    }
+    int LinearSolverAMGX::SetSettingsFromJSON(json settingsJSON) {
+        settings.configAMGX = settingsJSON["config"];
+        settings.tolerance = settingsJSON["tolerance"];
+        settings.max_iter = settingsJSON["max_iter"];
+        return 0;
+    };
 
 	int LinearSolverAMGX::SolveRightSide(SparseMatrix& A,
 		SparseVector& b,
@@ -65,10 +64,9 @@ namespace SPARSE {
 
         mode = AMGX_mode_dDDI;
 
-        //AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, "C:/LIBS64/AMGX/INSTALL/lib/configs/FGMRES_CLASSICAL_AGGRESSIVE_HMIS.json"));
-        AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, "C:/LIBS64/AMGX/INSTALL/lib/configs/FGMRES_my.json"));
-        AMGX_SAFE_CALL(AMGX_config_add_parameters(&cfg, "exception_handling=1"));
-        AMGX_SAFE_CALL(AMGX_config_add_parameters(&cfg, "communicator=MPI, min_rows_latency_hiding=10000"));
+        AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, settings.configAMGX.c_str()));
+
+        //TODO: set precision
         
 
 
@@ -157,7 +155,7 @@ namespace SPARSE {
         AMGX_unpin_memory(h_ColsA64_t);
         AMGX_unpin_memory(h_RowsA);
         AMGX_unpin_memory(h_ValsA);
-        std::string FileName("err_");
+        /*std::string FileName("err_");
         std::ofstream file(FileName + std::to_string(rank) + "_.txt");
 
         if (!file.is_open())
@@ -173,7 +171,7 @@ namespace SPARSE {
             if (i != n - 1) {
                 file << std::endl;
             }
-        }
+        }*/
 
         /* destroy resources, matrix, vector and solver */
         AMGX_solver_destroy(solver);

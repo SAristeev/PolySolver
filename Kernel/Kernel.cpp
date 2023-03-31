@@ -1,5 +1,6 @@
 #include"Kernel.h"
 #include<iostream>
+
 #include<map>
 #include<cusparse.h>
 
@@ -49,7 +50,6 @@ namespace KERNEL {
 	void InitLinearSolvers(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>& LinearFactory) {
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERSP>(SPARSE::SolverID::cuSOLVERSP);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF>(SPARSE::SolverID::cuSOLVERRF);
-		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF0>(SPARSE::SolverID::cuSOLVERRF0);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF_ALLGPU>(SPARSE::SolverID::cuSOLVERRF_ALLGPU);
 		LinearFactory.add<SPARSE::LinearSolverAMGX>(SPARSE::SolverID::AMGX);
 	}
@@ -58,6 +58,7 @@ namespace KERNEL {
 
 	
 	ProblemCase::ProblemCase(std::string ConfigName) {
+		//TODO: create individual settings
 		std::ifstream file(ConfigName);
 		config = json::parse(file);
 		InitLinearSolvers(LinearFactory);
@@ -70,35 +71,57 @@ namespace KERNEL {
 		
 		A.freadCSR(settings.casePath + "/" + settings.caseName + "/A.txt");
 		b.AddData(settings.casePath + "/" + settings.caseName + "/B.vec");
+
 		settings.n_rhs = config["LinearProblem"]["n_rhs"];
 		settings.print_answer = config["LinearProblem"]["print_answer"];
+		settings.print_time = config["LinearProblem"]["print_time"];
 		settings.check_answer = config["LinearProblem"]["check_answer"];
+		settings.print_to_file = config["LinearProblem"]["print_to_file"];
+		settings.resFileName = config["LinearProblem"]["results_file_name"];
 	}
 
 
 	void ProblemCase::start() {
 		double start, stop;
 		size_t cur = 0;
+		std::ofstream resFile(settings.casePath + "/" + settings.caseName + "/" + settings.resFileName);
+		resFile << "SolverName" << ", " << "time";
+		if (settings.check_answer) {
+			resFile << ", ||Ax-b||L1, ||Ax-b||L2, ||Ax-b||L1, ";
+			resFile << "||Ax-b||/||b||L1, ||Ax-b||/||b||L2, ||Ax-b||/||b||L1";
+		}
+		resFile << std::endl;
 		for (auto solver : LinearSolvers) {
+			//TODO: what do with empty yelds in json
+			std::string tmp = solver.first->getName() + "_settings";
+			solver.first->SetSettingsFromJSON(config["LinearProblem"][tmp.c_str()]);
 			start = second();
 			solver.first->SolveRightSide(A, b, x);
 			stop = second();
+			
+			settings.time.push_back(stop - start);
 			if (settings.print_answer) {
-				std::string SolverName = SolverID2String(solver.second);
-				x.fprint(cur, settings.casePath + "/" + settings.caseName + "/X_" + SolverName + "_.txt");
+				x.fprint(cur, settings.casePath + "/" + settings.caseName + "/X_" + solver.first->getName() + "_.txt");
 			}
-			if (settings.check_answer) {
-				//TO DO:
-				//std::string SolverName = SolverID2String(solver.second);
-				//r.fprint(cur, settings.casePath + "/" + settings.caseName + "/R_" + SolverName + "_.txt");
+						
+			if (settings.print_to_file) {
+				resFile << solver.first->getName() << ", " << stop - start;
+				if (settings.check_answer) {
+					double absnorm1, absnorm2, absnorminf;
+					double relnorm1, relnorm2, relnorminf;
+					Check(absnorm1, absnorm2, absnorminf, relnorm1, relnorm2, relnorminf);
+					resFile << ", " << absnorm1 << ", ";
+					resFile << absnorm2 << ", ";
+					resFile << absnorminf << ", ";
+					resFile << relnorm1 << ", ";
+					resFile << relnorm2 << ", ";
+					resFile << relnorminf;
+				}
+				resFile << std::endl;
 			}
 			cur++;
-			settings.time.push_back(stop - start);
+			
 		}
-
-		
-
-		
 	}
 	
 	void ProblemCase::Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {
@@ -163,13 +186,6 @@ namespace KERNEL {
 			&one, vecAx, CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, buffer));
 
 		gpuErrchk(cudaMemcpy(h_r, d_b, sizeof(double) * n, cudaMemcpyDeviceToHost));
-
-
-
-
-
-
-
 
 		cusparseDestroy(cusparseH);
 		absnorm1 = 0, absnorm2 = 0, absnorminf = 0;
