@@ -120,7 +120,8 @@ namespace SPARSE{
 
 	int SparseVector::SetOnes(int n, int nrhs) {
 		Clear(); 
-		nrhs++;
+		this->nrhs++;
+		this->n = n;
 		std::vector<double> tmp(n * nrhs); 
 		std::fill(tmp.begin(), tmp.end(), 1);
 		Vals.insert(Vals.end(), tmp.begin(),tmp.end());

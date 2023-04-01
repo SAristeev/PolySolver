@@ -102,7 +102,7 @@ namespace KERNEL {
 			
 			settings.time.push_back(stop - start);
 			if (settings.print_answer) {
-				x.fprint(cur, settings.casePath + "/" + settings.caseName + "/X_" + solver.first->getName() + "_.txt");
+				x.fprint(cur, settings.casePath + "/" + settings.caseName + "/X_" + solver.first->getName() + ".vec");
 			}
 						
 			if (settings.print_to_file) {
@@ -126,6 +126,7 @@ namespace KERNEL {
 	}
 	
 	void ProblemCase::Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {
+		// TODO: bug in check
 		int n, nnzA;
 
 		int* h_RowsA = nullptr; // GPU <int>    n+1

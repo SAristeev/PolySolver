@@ -28,8 +28,8 @@ namespace SPARSE {
         A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
         b.GetData(&h_b);
         x.SetOnes(n, 1);
-        x.GetData(&h_x_all);
-        h_x = (double*)malloc(n * sizeof(double));
+        x.GetData(&h_x);
+        //h_x = (double*)malloc(n * sizeof(double));
         int nb = 0, nrhs = 0;
         b.GetInfo(nb, nrhs);
         if (nb != n) {
