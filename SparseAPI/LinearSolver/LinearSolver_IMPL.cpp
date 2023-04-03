@@ -5,6 +5,11 @@ namespace SPARSE {
 	int LinearSolver::IsReadyToSolve() {
 		return 1;
 	}
+	
+	int LinearSolver::SetMPI(MPI_Comm& mpi_comm) {
+		this->mpi_comm = mpi_comm;
+		return 0;
+	}
 
 	int LinearSolver::PrepareToSolveByMatrix(SparseMatrix A,
 		SparseVector b,

@@ -20,7 +20,7 @@
 
 namespace KERNEL {
 	double second();
-
+	
 	using json = nlohmann::json;
 	void InitLinearSolvers(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> &LinearFactory);
 	void AddLinearImplementation(std::map<SPARSE::LinearSolver*, SPARSE::SolverID> &LinearSolvers, std::string solver);
@@ -61,6 +61,7 @@ namespace KERNEL {
 	public:
 		ProblemCase(std::string CN);
 		void start();
+		void startMPI(MPI_Comm& mpi_comm);
 		void Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
 	};
 }
