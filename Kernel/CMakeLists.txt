@@ -20,6 +20,8 @@ if(USE_cuSOLVER)
 	target_link_libraries(Kernel PRIVATE CUDA::cudart CUDA::cusolver CUDA::cusparse)
 endif(USE_cuSOLVER)
 
+target_include_directories(Kernel PRIVATE ${MKL_INCLUDE_DIR})
+target_link_libraries(Kernel PRIVATE ${MKL_LIBRARIES})
 
 if(USE_AMGX)
 	add_definitions(-DUSE_AMGX)

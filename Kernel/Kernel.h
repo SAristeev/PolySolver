@@ -7,13 +7,8 @@
 #include "json.hpp"
 #include "../SparseAPI/SparseAPI.h"
 #include "../SparseAPI/LinearSolver/LinearSolver_IMPL.h"
-#ifdef USE_cuSOLVER
-#include "../SparseAPI/LinearSolver/LinearSolver_cuSOLVER.h"
-#endif // USE_cuSOLVER
-#ifdef USE_AMGX
 #include "../SparseAPI/LinearSolver/LinearSolver_AMGX.h"
-#endif // USE_AMGX
-#include "../SparseAPI/LinearSolver/LinearSolver_PARDISO.h"
+#include "../SparseAPI/LinearSolver/LinearSolver_cuSOLVER.h"
 
 
 
@@ -23,19 +18,17 @@ namespace KERNEL {
 	
 	using json = nlohmann::json;
 	void InitLinearSolvers(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> &LinearFactory);
-	void AddLinearImplementation(std::map<SPARSE::LinearSolver*, SPARSE::SolverID> &LinearSolvers, std::string solver);
-	//void AddEigenImplementation(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>& LinearFactory);
+	//void AddLinearImplementation(std::map<SPARSE::LinearSolver*, SPARSE::SolverID> &LinearSolvers, std::string solver);
 	
 	struct Settings {
 		std::string caseName;
 		std::string casePath;
 		std::string resFileName;
 		std::vector<std::string> solversName;
-		std::vector<std::string> casesNames;
 
 		int n_rhs;
 		std::vector<double> time;
-		int AMGX_copies = 0;
+		//double time;
 
 		double absnorm1, absnorm2, absnorminf;
 		double relnorm1, relnorm2, relnorminf;
@@ -58,10 +51,15 @@ namespace KERNEL {
 		std::map<SPARSE::LinearSolver*, SPARSE::SolverID> LinearSolvers;
 		SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> LinearFactory;
 		Settings settings;
-	public:
+	public:		
 		ProblemCase(std::string CN);
 		void start();
 		void startMPI(MPI_Comm& mpi_comm);
-		void Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
+		void CheckGPU(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
+		void CheckMKL(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
+		void print();
 	};
+
+
+
 }
