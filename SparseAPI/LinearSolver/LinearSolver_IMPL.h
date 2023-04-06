@@ -14,9 +14,10 @@ namespace SPARSE {
 		cuSOLVERRF0 = 3,
 		cuSOLVERRF_ALLGPU = 4,
 		AMGX = 5,
+		PARDISO = 6,
 		ALL = 99
 	};
-	std::string SolverID2String(SolverID ID);
+	//std::string SolverID2String(SolverID ID);
 	
 
 

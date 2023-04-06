@@ -1,30 +1,38 @@
-
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 project(PolySolver VERSION 0.1.0 LANGUAGES CXX C)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 set (CMAKE_CXX_STANDARD 20)
 
-option(USE_FLOAT "enable single precision" OFF)
-option(USE_64_BIT_INT "enable x64 integer" OFF)
 
+option(USE_GPU "enable GPU" ON)
+
+option(USE_cuSOLVER "find and enable cuSOLVER" OFF)
 option(USE_GINKGO "find and enable Ginkgo" OFF)
 option(USE_AMGX "find and enable AMGX" OFF)
 option(USE_PETSc "find and enable PETSc" OFF)
 option(USE_PARDISO "find and enable PARDISO" OFF)
 
 
-if(USE_64_BIT_INT)
-	add_definitions(-DUSE_64_BIT_INT)
-endif(USE_64_BIT_INT)
 
 
+if(NOT USE_GPU)
+	set(USE_AMGX OFF)
+	set(USE_cuSOLVER OFF)
+endif(NOT USE_GPU)
 
-find_package(CUDAToolkit)
-message("FIND CUDA: " ${CUDAToolkit_BIN_DIR})
+find_package(MKL REQUIRED)
+message("\nFIND MKL VERSION: ${MKL_VERSION}")
+message("     MKL_INCLUDE_DIR: ${MKL_INCLUDE_DIR}")
+message("     MKL_LIBRARIES: ${MKL_LIBRARIES}")
 
+if(USE_cuSOLVER)
+	find_package(CUDAToolkit)
+	message("\nFIND CUDA: " ${CUDAToolkit_BIN_DIR})
+endif(USE_cuSOLVER)
 
 if(USE_GINKGO)
 	find_package(Ginkgo)
-	message("FIND Ginkgo: " ${Ginkgo_DIR})
+	message("\nFIND Ginkgo: " ${Ginkgo_DIR})
 	set(Ginkgo_INCLUDE_DIR  "${Ginkgo_DIR}/../../../include")
 	set(Ginkgo_LIBRARIES_DIR "${Ginkgo_DIR}/../../../lib")
 	message("     Ginkgo include dir: " ${Ginkgo_INCLUDE_DIR} )
@@ -32,20 +40,28 @@ if(USE_GINKGO)
 endif(USE_GINKGO)
 
 if(USE_AMGX)
-	message("FIND AMGX: " $ENV{AMGX_DIR})
+	message("\nFIND AMGX: " $ENV{AMGX_DIR})
+	find_package(MPI)
+	if(MPI_FOUND)
+		message("     MPI_INCLUDE_PATH: " ${MPI_INCLUDE_PATH})
+	endif(MPI_FOUND)
 endif(USE_AMGX)
-
 
 
 add_executable(PolySolver "PolySolver.cpp")
 
 
-target_include_directories(PolySolver PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+target_include_directories(PolySolver PRIVATE ${MKL_INCLUDE_DIR})
 
+if(USE_cuSOLVER)
+	target_include_directories(PolySolver PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+endif(USE_cuSOLVER)
 
 if(USE_AMGX)
 	target_include_directories(PolySolver PRIVATE "$ENV{AMGX_DIR}/include")
-	target_link_libraries(PolySolver PRIVATE "$ENV{AMGX_DIR}/lib/amgxsh.lib")
+	if(MPI_FOUND)
+		target_include_directories(PolySolver PRIVATE "${MPI_INCLUDE_PATH}")
+	endif(MPI_FOUND)
 endif(USE_AMGX)
 
 

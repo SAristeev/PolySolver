@@ -214,6 +214,65 @@ namespace KERNEL {
 		if (h_r) { free(h_r); }
 
 	}
+
+	void ProblemCase::CheckMKL(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf) {
+		int n, nnzA;
+		int* h_RowsA = nullptr; // GPU <int>    n+1
+		int* h_ColsA = nullptr; // GPU <int>    nnzA
+		double* h_ValsA = nullptr; // GPU <double> nnzA 
+		double* h_x = nullptr; // GPU <double> n
+		double* h_b = nullptr; // GPU <double> n
+		double* h_r = nullptr; // GPU <double> n
+
+		A.GetInfo(n, nnzA);
+		A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
+		b.GetData(&h_b);
+		x.GetData(&h_x);
+
+		const double alpha = 1.0;
+		const double beta = -1.0;
+		const char trans = 'N';
+		char matdesra[6];
+		matdesra[0] = 'G';
+		matdesra[3] = 'C';
+		h_r = (double*)malloc(n * sizeof(double));
+		memcpy(h_r, h_b, n * sizeof(double));
+		int* pointerB = (int*)malloc(n * sizeof(int));
+		int* pointerE = (int*)malloc(n * sizeof(int));
+		for (size_t i = 0; i < n; i++) {
+			pointerB[i] = h_RowsA[i];
+			pointerE[i] = h_RowsA[i + 1];
+		}
+
+		mkl_dcsrmv(&trans, &n, &n, &alpha, matdesra, h_ValsA, h_ColsA, pointerB, pointerE, h_x, &beta, h_r);
+
+		absnorm1 = 0, absnorm2 = 0, absnorminf = 0;
+		for (int i = 0; i < n; i++) {
+			//h_r[i] = _distafter[i] - _distbefore[i];
+			absnorm1 += abs(h_r[i]);
+			absnorm2 += h_r[i] * h_r[i];
+			absnorminf = abs(h_r[i]) > absnorminf ? abs(h_r[i]) : absnorminf;
+		}
+		absnorm2 = sqrt(absnorm2);
+
+		relnorm1 = 0, relnorm2 = 0, relnorminf = 0;
+		for (int i = 0; i < n; i++) {
+			//h_r[i] = _distafter[i] - _distbefore[i];
+			relnorm1 += abs(h_b[i]);
+			relnorm2 += h_b[i] * h_b[i];
+			relnorminf = abs(h_b[i]) > relnorminf ? abs(h_b[i]) : relnorminf;
+		}
+		relnorm2 = sqrt(relnorm2);
+
+		relnorm1 = absnorm1 / relnorm1;
+		relnorm2 = absnorm2 / relnorm2;
+		relnorminf = absnorminf / relnorminf;
+
+		free(h_r);
+		free(pointerE);
+		free(pointerB);
+	}
+
 	void ProblemCase::print() {
 
 	}

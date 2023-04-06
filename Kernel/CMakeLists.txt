@@ -11,12 +11,19 @@ set(Kernel_HDRS ${Kernel_HDRS_})
 
 add_library(Kernel ${Kernel_SRSC} ${Kernel_HDRS})
 
+target_include_directories(Kernel PRIVATE ${MKL_INCLUDE_DIR})
+target_link_libraries(Kernel PRIVATE ${MKL_LIBRARIES})
 
-target_include_directories(Kernel PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(Kernel PRIVATE CUDA::cudart CUDA::cusolver CUDA::cusparse)
+if(USE_cuSOLVER)
+	target_include_directories(Kernel PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+	target_link_libraries(Kernel PRIVATE CUDA::cudart CUDA::cusolver CUDA::cusparse)
+endif(USE_cuSOLVER)
 
 
 if(USE_AMGX)
 	target_include_directories(Kernel PRIVATE "$ENV{AMGX_DIR}/include")
 	target_link_libraries(Kernel PRIVATE "$ENV{AMGX_DIR}/lib/amgxsh.lib")
+	if(MPI_FOUND)
+		target_include_directories(Kernel PRIVATE "${MPI_INCLUDE_PATH}")
+	endif(MPI_FOUND)
 endif(USE_AMGX)

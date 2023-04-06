@@ -4,7 +4,7 @@ namespace SPARSE {
 
 	
 
-	std::string SolverID2String(SolverID ID) {
+	/*std::string SolverID2String(SolverID ID) {
 		switch (ID)
 		{
 		case SPARSE::SolverID::cuSOLVERSP:
@@ -18,7 +18,7 @@ namespace SPARSE {
 		case SPARSE::SolverID::AMGX:
 			return std::string("AMGX");
 		}
-	}
+	}*/
 
 	int LinearSolver::IsReadyToSolve() {
 		return 1;
@@ -30,7 +30,7 @@ namespace SPARSE {
 		return IsReadyToSolve();
 	}
 	void AddLinearImplementation(std::map<LinearSolver*, SolverID>& LinearSolvers, ObjectSolverFactory<LinearSolver, SolverID> &LinearFactory, std::string solver) {
-		static std::unordered_map<std::string, SolverID> const table = { {"cuSOLVER",SolverID::cuSOLVERSP}, {"AMGX",SolverID::AMGX} };
+		static std::unordered_map<std::string, SolverID> const table = { {"cuSOLVER",SolverID::cuSOLVERSP}, {"AMGX",SolverID::AMGX}, {"PARDISO",SolverID::PARDISO} };
 		auto it = table.find(solver);
 		SolverID SID;
 		if (it != table.end()) {

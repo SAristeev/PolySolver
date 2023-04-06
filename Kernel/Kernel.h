@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <map>
+#include <mkl.h>
 #include "json.hpp"
 #include "../SparseAPI/SparseAPI.h"
 #include "../SparseAPI/LinearSolver/LinearSolver_IMPL.h"
@@ -11,27 +12,7 @@
 
 
 
-//class Config {
-//private:
-//	std::vector<SPARSE::SolverID> solvers;
-//	std::string CaseName;
-//	double abstolerance = 1e-6;
-//	double reltolerance = 1e-6;
-//	bool needTime = false;
-//	bool needPrint = false;
-//
-//public:
-//	Config(std::initializer_list<SPARSE::SolverID> list, std::string CN) : solvers(list) { CaseName = CN; }
-//	Config(SPARSE::SolverID id, std::string CN) {solvers.push_back(id); CaseName = CN;}
-//	void SetAbsTol(double tol) { abstolerance = tol; }
-//	void SetRelTol(double tol) { reltolerance = tol; }
-//	void SetTime(bool time) { needTime = time; }
-//	void SetPrint(bool print) { needPrint = print; }
-//	
-//	std::vector<SPARSE::SolverID>::iterator GetFirstID() { return solvers.begin(); }
-//	std::vector<SPARSE::SolverID>::iterator GetLastID() { return solvers.end(); }
-//
-//};
+
 namespace KERNEL {
 	double second();
 
@@ -80,9 +61,7 @@ namespace KERNEL {
 		void start();
 		//void start();
 		void Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
+		void CheckMKL(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
 		void print();
 	};
-
-
-
 }
