@@ -11,17 +11,14 @@ namespace SPARSE {
 	
 	class LinearSolvercuSOLVERSP : public LinearSolver {
 	private:
-		double* d_Vals, *d_x, *d_b;
-		int* d_Rows, * d_Cols;
-		double* h_Vals, *h_b, *h_x;
-		int* h_Rows, * h_Cols;
-		int n, nnz;
+		double* d_ValsA, *d_x, *d_b;
+		int* d_RowsA, * d_ColsA;
 	public:
 		LinearSolvercuSOLVERSP(): LinearSolver("cuSOLVERSP") {}
 		virtual int SolveRightSide(SparseMatrix &A,
 			SparseVector &b,
 			SparseVector &x) final;
-		virtual int SetSettingsFromJSON(json settings) final { return 0; };
+		virtual int SetSettingsFromJSON(json settingsJSON) final { nrhs = settingsJSON["n_rhs"]; return 0; };
 	};
 
 	class LinearSolvercuSOLVERRF : public LinearSolver {
@@ -32,9 +29,6 @@ namespace SPARSE {
 		int*    d_RowsA = nullptr; // GPU <int>    n+1
 		int*    d_ColsA = nullptr; // GPU <int>    nnzA
 		double* d_ValsA = nullptr; // GPU <double> nnzA
-		int*    h_RowsA = nullptr; // CPU <int>    n+1
-		int*    h_ColsA = nullptr; // CPU <int>    nnzA
-		double* h_ValsA = nullptr; // CPU <double> nnzA
 		
 		int		nnzL;
 		int*    d_RowsL = nullptr; // GPU <int>    n+1
@@ -72,7 +66,7 @@ namespace SPARSE {
 		int SolveRightSide(SparseMatrix& A,
 			SparseVector& b,
 			SparseVector& x) final;
-		virtual int SetSettingsFromJSON(json settings) final { return 0; };
+		virtual int SetSettingsFromJSON(json settingsJSON) final { nrhs = settingsJSON["n_rhs"]; return 0; };
 		void freeGPUMemory();
 	};
 
@@ -86,10 +80,6 @@ namespace SPARSE {
 		int* d_ColsA = nullptr; // GPU <int>    nnzA
 		double* d_ValsA = nullptr; // GPU <double> nnzA
 		
-		int* h_RowsA = nullptr; // CPU <int>    n+1
-		int* h_ColsA = nullptr; // CPU <int>    nnzA
-		double* h_ValsA = nullptr; // CPU <double> nnzA
-
 		//int*    d_P     = nullptr; // GPU <int>    n
 		int* h_P = nullptr; // CPU <int>    n
 
@@ -110,7 +100,7 @@ namespace SPARSE {
 		int SolveRightSide(SparseMatrix& A,
 			SparseVector& b,
 			SparseVector& x) final;
-		virtual int SetSettingsFromJSON(json settings) final { return 0; };
+		virtual int SetSettingsFromJSON(json settingsJSON) final { nrhs = settingsJSON["n_rhs"]; return 0; };
 		void freeGPUMemory();
 	};
 

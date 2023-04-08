@@ -52,6 +52,7 @@ namespace KERNEL {
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF>(SPARSE::SolverID::cuSOLVERRF);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF_ALLGPU>(SPARSE::SolverID::cuSOLVERRF_ALLGPU);
 		LinearFactory.add<SPARSE::LinearSolverAMGX>(SPARSE::SolverID::AMGX);
+		LinearFactory.add<SPARSE::LinearSolverPARDISO>(SPARSE::SolverID::PARDISO);
 	}
 	
 	void setSettingsFromJSON(json config);
@@ -72,7 +73,7 @@ namespace KERNEL {
 		A.freadCSR(settings.casePath + "/" + settings.caseName + "/A.txt");
 		b.AddData(settings.casePath + "/" + settings.caseName + "/B.vec");
 
-		settings.n_rhs = config["LinearProblem"]["n_rhs"];
+		settings.n_rhs = config["LinearProblem"]["n_rhs"] - 1; // zero-indexing
 		settings.print_answer = config["LinearProblem"]["print_answer"];
 		settings.print_time = config["LinearProblem"]["print_time"];
 		settings.check_answer = config["LinearProblem"]["check_answer"];
@@ -93,15 +94,21 @@ namespace KERNEL {
 		resFile << std::endl;
 		for (auto solver : LinearSolvers) {
 			//TODO: what do with empty yelds in json
-			std::string tmp = solver.first->getName() + "_settings";
-			solver.first->SetSettingsFromJSON(config["LinearProblem"][tmp.c_str()]);
+			solver.first->SetSettingsFromJSON(config["LinearProblem"]);
+			solver.first->PrepareToSolveByMatrix(A, b, x);
+
 			start = second();
 			solver.first->SolveRightSide(A, b, x);
 			stop = second();
 			
 			settings.time.push_back(stop - start);
 			if (settings.print_answer) {
-				x.fprint(cur, settings.casePath + "/" + settings.caseName + "/X_" + solver.first->getName() + ".vec");
+				int n = 0, nrhs = 0;
+				x.GetInfo(n, nrhs);
+				for (int i = 0; i < nrhs; i++) {
+					x.fprint(i, settings.casePath + "/" + settings.caseName + "/X_" + std::to_string(i) + "_" + solver.first->getName() + ".vec");
+				}
+				
 			}
 						
 			if (settings.print_to_file) {
@@ -109,7 +116,7 @@ namespace KERNEL {
 				if (settings.check_answer) {
 					double absnorm1, absnorm2, absnorminf;
 					double relnorm1, relnorm2, relnorminf;
-					Check(absnorm1, absnorm2, absnorminf, relnorm1, relnorm2, relnorminf);
+					CheckMKL(absnorm1, absnorm2, absnorminf, relnorm1, relnorm2, relnorminf);
 					resFile << ", " << absnorm1 << ", ";
 					resFile << absnorm2 << ", ";
 					resFile << absnorminf << ", ";
@@ -120,7 +127,7 @@ namespace KERNEL {
 				resFile << std::endl;
 			}
 			cur++;
-			
+			x.Clear();
 		}
 	}
 	

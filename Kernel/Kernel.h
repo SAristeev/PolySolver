@@ -9,6 +9,7 @@
 #include "../SparseAPI/LinearSolver/LinearSolver_IMPL.h"
 #include "../SparseAPI/LinearSolver/LinearSolver_AMGX.h"
 #include "../SparseAPI/LinearSolver/LinearSolver_cuSOLVER.h"
+#include "../SparseAPI/LinearSolver/LinearSolver_PARDISO.h"
 
 
 

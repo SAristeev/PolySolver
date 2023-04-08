@@ -2,16 +2,30 @@
 
 namespace SPARSE {
     int LinearSolverAMGX::SetSettingsFromJSON(json settingsJSON) {
-        settings.configAMGX = settingsJSON["config"];
-        settings.tolerance = settingsJSON["tolerance"];
-        settings.max_iter = settingsJSON["max_iter"];
+        nrhs = settingsJSON["n_rhs"];
+        settings.configAMGX = settingsJSON["AMGX_settings"]["config"];
+        settings.tolerance = settingsJSON["AMGX_settings"]["tolerance"];
+        settings.max_iter = settingsJSON["AMGX_settings"]["max_iter"];
         return 0;
     };
 
 	int LinearSolverAMGX::SolveRightSide(SparseMatrix& A,
 		SparseVector& b,
 		SparseVector& x) {
-        
+
+        A.GetInfo(n, nnzA);
+        A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
+
+        b.GetData(&h_b);
+
+        int nb = 0, nrhsdum = 0;
+        b.GetInfo(nb, nrhsdum);
+        if (nb != n) {
+            return -1;
+        }
+        x.SetOnes(n, nrhs);
+        x.GetData(&h_x);
+
         //library handles
         AMGX_Mode mode;
         AMGX_config_handle cfg;
@@ -24,18 +38,6 @@ namespace SPARSE {
         AMGX_SOLVE_STATUS status;
         
         
-        A.GetInfo(n, nnzA);
-        A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
-        b.GetData(&h_b);
-        x.SetOnes(n, 1);
-        x.GetData(&h_x);
-        //h_x = (double*)malloc(n * sizeof(double));
-        int nb = 0, nrhs = 0;
-        b.GetInfo(nb, nrhs);
-        if (nb != n) {
-            return -1;
-        }
-
         int block_dimx = 1, block_dimy = 1, block_size;
         
 

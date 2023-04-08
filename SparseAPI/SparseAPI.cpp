@@ -1,4 +1,4 @@
-#include"SparseAPI.h"
+ #include"SparseAPI.h"
 
 
 namespace SPARSE{
@@ -119,7 +119,6 @@ namespace SPARSE{
 }
 
 	int SparseVector::SetOnes(int n, int nrhs) {
-		Clear(); 
 		this->nrhs++;
 		this->n = n;
 		std::vector<double> tmp(n * nrhs); 
@@ -197,6 +196,7 @@ namespace SPARSE{
 
 		for (int i = 0; i < this->n; i++)
 		{	
+
 			file << std::format("{:.20e}", Vals[i + n]); // with zero
 			if (i != this->n - 1) {
 				file << std::endl;

@@ -1,25 +1,27 @@
 #include "LinearSolver_cuSOLVER.h"
 namespace SPARSE {
 	int LinearSolvercuSOLVERSP::SolveRightSide(SparseMatrix &A,	SparseVector &b,SparseVector &x){
-		A.GetInfo(n, nnz);
-		A.GetDataCSR(&h_Vals, &h_Rows, &h_Cols);
+		A.GetInfo(n, nnzA);
+		A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
 		b.GetData(&h_b);
-		int nb = 0, nrhs = 0;
-		b.GetInfo(nb, nrhs);
+		int nb = 0, nrhsdum = 0;
+		b.GetInfo(nb, nrhsdum);
 		if (nb != n) {
 			return -1;
 		}
+		x.SetOnes(n, nrhs);
+		x.GetData(&h_x);
 
-		gpuErrchk(cudaMalloc((void**)&d_Vals, nnz * sizeof(double)));
-		gpuErrchk(cudaMalloc((void**)&d_Cols, nnz * sizeof(int)));
-		gpuErrchk(cudaMalloc((void**)&d_Rows, (n + 1) * sizeof(int)));
+		gpuErrchk(cudaMalloc((void**)&d_ValsA, nnzA * sizeof(double)));
+		gpuErrchk(cudaMalloc((void**)&d_ColsA, nnzA * sizeof(int)));
+		gpuErrchk(cudaMalloc((void**)&d_RowsA, (n + 1) * sizeof(int)));
 
 		gpuErrchk(cudaMalloc((void**)&d_b, n * sizeof(double)));
 		gpuErrchk(cudaMalloc((void**)&d_x, n * sizeof(double)));
 
-		gpuErrchk(cudaMemcpy(d_Vals, h_Vals, nnz * sizeof(double),  cudaMemcpyHostToDevice));
-		gpuErrchk(cudaMemcpy(d_Cols, h_Cols, nnz * sizeof(int),     cudaMemcpyHostToDevice));
-		gpuErrchk(cudaMemcpy(d_Rows, h_Rows, (n + 1) * sizeof(int), cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_ValsA, h_ValsA, nnzA * sizeof(double),  cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_ColsA, h_ColsA, nnzA * sizeof(int),     cudaMemcpyHostToDevice));
+		gpuErrchk(cudaMemcpy(d_RowsA, h_RowsA, (n + 1) * sizeof(int), cudaMemcpyHostToDevice));
 
 		gpuErrchk(cudaMemcpy(d_b, h_b, n * sizeof(double), cudaMemcpyHostToDevice));
 		
@@ -31,28 +33,18 @@ namespace SPARSE {
 		cusparseSetMatType(descr_A, CUSPARSE_MATRIX_TYPE_GENERAL);
 		cusparseSetMatIndexBase(descr_A, CUSPARSE_INDEX_BASE_ZERO);
 
-		h_x = (double*)malloc(n * sizeof(double));
-
 		int singularity = 0;	
 		for (int i = 0; i < nrhs; i++) {
-
-			gpuErrchk(cudaMemcpy(d_b, h_b + i * n, n * sizeof(double), cudaMemcpyHostToDevice));
-
-			gpuErrchk(cusolverSpDcsrlsvqr(handle, n, nnz, descr_A, d_Vals, d_Rows, d_Cols, d_b, 1e-12, 0, d_x, &singularity));
-
-			gpuErrchk(cudaMemcpy(h_x, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));
-			x.AddData(h_x, n);
+			gpuErrchk(cudaMemcpy(d_b, h_b, n * sizeof(double), cudaMemcpyHostToDevice));
+			gpuErrchk(cusolverSpDcsrlsvqr(handle, n, nnzA, descr_A, d_ValsA, d_RowsA, d_ColsA, d_b, 1e-12, 0, d_x, &singularity));
+			gpuErrchk(cudaMemcpy(h_x + i * n, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));
 		}
 
-		gpuErrchk(cudaFree(d_Vals)); d_Vals = nullptr;
-		gpuErrchk(cudaFree(d_Cols)); d_Cols = nullptr;
-		gpuErrchk(cudaFree(d_Rows)); d_Rows = nullptr;
+		gpuErrchk(cudaFree(d_ValsA)); d_ValsA = nullptr;
+		gpuErrchk(cudaFree(d_ColsA)); d_ColsA = nullptr;
+		gpuErrchk(cudaFree(d_RowsA)); d_RowsA = nullptr;
 		gpuErrchk(cudaFree(d_x)); d_x = nullptr;
 		gpuErrchk(cudaFree(d_b)); d_b = nullptr;
-
-		
-
-		//free(h_x); h_x = nullptr;
 		return 0;
 	}	
 	void LinearSolvercuSOLVERRF::freeGPUMemory() 
@@ -76,16 +68,20 @@ namespace SPARSE {
 
 	}
 	int LinearSolvercuSOLVERRF::SolveRightSide(SparseMatrix& A, SparseVector& b, SparseVector& x) 
-	 {
+	 {		
 		A.GetInfo(n, nnzA);
 		A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
+
 		b.GetData(&h_b);
-		int nb = 0, nrhs = 0;
-		b.GetInfo(nb, nrhs);
-		if (nb != n  || nrhs <=0) 
-		{
+
+		int nb = 0, nrhsdum = 0;
+		b.GetInfo(nb, nrhsdum);
+		if (nb != n) {
 			return -1;
 		}
+		x.SetOnes(n, nrhs);
+		x.GetData(&h_x);
+
 		// cuda data
 		size_t freeMem  = 0;
 		size_t needMem  = 0;
@@ -101,9 +97,6 @@ namespace SPARSE {
 
 		cusparseSetMatType(descr_A, CUSPARSE_MATRIX_TYPE_GENERAL);
 		cusparseSetMatIndexBase(descr_A, CUSPARSE_INDEX_BASE_ZERO);
-
-
-
 
 		double tol = 1e-12;
 		int singularity = 0; // if < 0 => matrix is singular 
@@ -123,13 +116,10 @@ namespace SPARSE {
 
 			gpuErrchk(cudaMemcpy(d_b, h_b, n * sizeof(double), cudaMemcpyHostToDevice));
 			
-			h_x = (double*)malloc(n * sizeof(double));
 			
 			gpuErrchk(cudaMemcpy(d_b, h_b, n * sizeof(double), cudaMemcpyHostToDevice));
 			gpuErrchk(cusolverSpDcsrlsvqr(cusolverSpH, n, nnzA, descr_A, d_ValsA, d_RowsA, d_ColsA, d_b, tol, 0, d_x, &singularity));
-			gpuErrchk(cudaMemcpy(h_x, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));
-
-			x.AddData(h_x, n);
+			gpuErrchk(cudaMemcpy(h_x, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));			
 		}
 		else
 		{
@@ -167,11 +157,9 @@ namespace SPARSE {
 			gpuErrchk(cusolverSpDcsrluFactorHost(cusolverSpH, n, nnzA, descr_A, h_ValsA, h_RowsA, h_ColsA, info, pivot_threshold, buffer_cpu));
 			gpuErrchk(cusolverSpDcsrluZeroPivotHost(cusolverSpH, info, tol, &singularity));
 
-			h_x = (double*)malloc(n * sizeof(double));
+			
 			gpuErrchk(cusolverSpDcsrluSolveHost(cusolverSpH, n, h_b, h_x, info, buffer_cpu));
-			x.AddData(h_x, n);
-
-
+			
 			// assume P*A*Q^T = L*U
 			// load info about P,Q,L,U
 
@@ -205,17 +193,7 @@ namespace SPARSE {
 			
 
 			gpuErrchk(cusolverSpDcsrluExtractHost(cusolverSpH, h_P, h_Q, descr_A, h_ValsL, h_RowsL, h_ColsL, descr_A, h_ValsU, h_RowsU, h_ColsU, info, buffer_cpu));
-			/*
-			SparseVectorInt P;
-			P.AddData(h_P, n);
-			P.fprint(n,"C:/MatlabRepository/GPU/P.txt");
-			SparseVectorInt Q;
-			Q.AddData(h_Q, n);
-			Q.fprint(n, "C:/MatlabRepository/GPU/Q.txt");
-			free(buffer_cpu); buffer_cpu = nullptr;*/
-
-
-
+			
 			gpuErrchk(cudaMalloc((void**)&d_RowsL, (n + 1) * sizeof(int))   );
 			gpuErrchk(cudaMalloc((void**)&d_ColsL, nnzL    * sizeof(int))   );
 			gpuErrchk(cudaMalloc((void**)&d_ValsL, nnzL    * sizeof(double)));
@@ -273,14 +251,13 @@ namespace SPARSE {
 				gpuErrchk(cudaMemcpy(d_b, h_b + i * n, n * sizeof(double), cudaMemcpyHostToDevice));
 				gpuErrchk(cusparseDbsrsv2_solve(cusparseH, CUSPARSE_DIRECTION_ROW, trans_L, n, nnzL, &alpha, descr_L, d_ValsL, d_RowsL, d_ColsL, 1, info_L, d_b, d_y, policy_L, pBuffer_L));
 				gpuErrchk(cusparseDbsrsv2_solve(cusparseH, CUSPARSE_DIRECTION_ROW, trans_U, n, nnzU, &alpha, descr_U, d_ValsU, d_RowsU, d_ColsU, 1, info_U, d_y, d_x, policy_U, pBuffer_U));
-				gpuErrchk(cudaMemcpy(h_x, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));
-				x.AddData(h_x, n);
+				gpuErrchk(cudaMemcpy(h_x + i * n, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));
 			}
 			gpuErrchk(cudaFree(pBuffer_L)); pBuffer_L = nullptr;
 			gpuErrchk(cudaFree(pBuffer_U)); pBuffer_U = nullptr;
 		}
 
-		free(h_x); h_x = nullptr;
+
 		freeGPUMemory();
 		return 0;
 	 }
@@ -295,17 +272,20 @@ namespace SPARSE {
 	}
 
 	int LinearSolvercuSOLVERRF_ALLGPU::SolveRightSide(SparseMatrix& A, SparseVector& b, SparseVector& x) {
+		 
 		A.GetInfo(n, nnzA);
 		A.GetDataCSR(&h_ValsA, &h_RowsA, &h_ColsA);
+
 		b.GetData(&h_b);
-		int nb = 0, nrhs = 0;
-		b.GetInfo(nb, nrhs);
-		if (nb != n || nrhs <= 0)
-		{
+
+		int nb = 0, nrhsdum = 0;
+		b.GetInfo(nb, nrhsdum);
+		if (nb != n) {
 			return -1;
 		}
-		 
-		 
+		x.SetOnes(n, nrhs);
+		x.GetData(&h_x);
+
 		gpuErrchk(cudaMalloc((void**)&d_ValsA, nnzA * sizeof(double)));
 		gpuErrchk(cudaMalloc((void**)&d_ColsA, nnzA * sizeof(int)));
 		gpuErrchk(cudaMalloc((void**)&d_RowsA, (n + 1) * sizeof(int)));
@@ -319,16 +299,10 @@ namespace SPARSE {
 
 		gpuErrchk(cudaMemcpy(d_b, h_b, n * sizeof(double), cudaMemcpyHostToDevice));
 		 
-		 
-		 
-		 
 		// cuda data
 		size_t freeMem = 0;
 		size_t needMem = 0;
-		size_t totalMem = 0;
-
-		 
-		 
+		size_t totalMem = 0;		 
 		 
 		// cuSolverSP handle - always need
 		cusolverSpHandle_t cusolverSpH = NULL;
@@ -340,10 +314,6 @@ namespace SPARSE {
 
 		cusparseSetMatType(descr_A, CUSPARSE_MATRIX_TYPE_GENERAL);
 		cusparseSetMatIndexBase(descr_A, CUSPARSE_INDEX_BASE_ZERO);
-
-
-
-
 
 
 		double tol = 1e-12;
@@ -407,14 +377,12 @@ namespace SPARSE {
 		//x.AddData(h_x, n);
 		for (int i = 0; i < nrhs; i++)
 		{
-			gpuErrchk(cudaMemcpy(d_b, h_b + i * n, n * sizeof(double), cudaMemcpyHostToDevice));
+			gpuErrchk(cudaMemcpy(d_b, h_b, n * sizeof(double), cudaMemcpyHostToDevice));
 			gpuErrchk(cusolverSpDcsrcholSolve(cusolverSpH, n, d_b, d_x, info, buffer_gpu));
-			gpuErrchk(cudaMemcpy(h_x, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));
-			x.AddData(h_x, n);
+			gpuErrchk(cudaMemcpy(h_x + i * n, d_x, n * sizeof(double), cudaMemcpyDeviceToHost));
 		}
 		gpuErrchk(cudaFree(buffer_gpu)); buffer_gpu = nullptr;
 		free(buffer_cpu); buffer_cpu = nullptr;
-		free(h_x); h_x = nullptr;
 		freeGPUMemory();
 		return 0;
 		}

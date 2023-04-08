@@ -2,6 +2,7 @@
 #include<map>
 #include"../SparseAPI.h"
 #include"../../Kernel/json.hpp"
+//#include"../../Kernel/Kernel.h"
 
 
 namespace SPARSE {
@@ -23,7 +24,16 @@ namespace SPARSE {
 
 
 	class LinearSolver {
+	protected:
 		std::string solverName;
+		int	   	n;
+		int	   	nnzA;
+		int	   	nrhs;
+		int*    h_RowsA = nullptr; // CPU <int>    n+1
+		int*    h_ColsA = nullptr; // CPU <int>    nnzA
+		double* h_ValsA = nullptr; // CPU <double> nnzA 
+		double* h_x     = nullptr; // CPU <double> n
+		double* h_b     = nullptr; // CPU <double> n
 	public:
 		LinearSolver(std::string SN) { solverName = SN; }
 		std::string getName() { return solverName; }
@@ -32,8 +42,9 @@ namespace SPARSE {
 			SparseVector  &b,
 			SparseVector  &x) = 0;
 		
+	
 		int IsReadyToSolve();
-		int IsReadyToSolveByMatrix(SparseMatrix A,
+		virtual int PrepareToSolveByMatrix(SparseMatrix A,
 			SparseVector b,
 			SparseVector x);
 		//int AddImplementation();

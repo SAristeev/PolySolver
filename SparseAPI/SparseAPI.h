@@ -112,12 +112,12 @@ namespace SPARSE {
 		std::vector<double> Vals;		
 		int n;
 		int nrhs;
-		void Clear() { Vals.clear(); n = 0; nrhs = 0; }
+		
 	public:
 		SparseVector() { Clear(); }
 		~SparseVector() { Clear(); }
 		int SetOnes(int n, int nrhs);
-		
+		void Clear() { Vals.clear(); n = 0; nrhs = 0; }
 		//void SetNrhs(int nrhs) { this->nrhs = nrhs; }
 		//void SetData(double* array, int len) { Clear(); n = len; nrhs = 1; Vals.insert(Vals.end(), &array[0], &array[len]); }
 		int AddData(double* array, int len) {
@@ -135,6 +135,7 @@ namespace SPARSE {
 		int AddData(std::string FileName);
 
 		int GetData(double** Vals) { *Vals = this->Vals.data(); return 0; }
+		int GetData(size_t i, double** Vals) { *Vals = this->Vals.data() + n*i; return 0; }
 		int GetInfo(int &n, int& nrhs) { n = this->n; nrhs = this->nrhs; return 0; }
 
 		//int fread(std::string FileName);
