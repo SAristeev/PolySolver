@@ -55,7 +55,6 @@ namespace KERNEL {
 	}
 	
 	ProblemCase::ProblemCase(std::string ConfigName) {
-		//TODO: create individual settings
 		std::ifstream file(ConfigName);
 		try {
 			config = json::parse(file);
@@ -96,7 +95,6 @@ namespace KERNEL {
 			throw std::exception("Invalid case name");
 		}
 		try{
-			settings.caseName = config["LinearProblem"]["case_name"];
 			for (auto caseName : config["LinearProblem"]["cases_names"]) {
 				settings.casesNames.push_back(caseName);
 			}

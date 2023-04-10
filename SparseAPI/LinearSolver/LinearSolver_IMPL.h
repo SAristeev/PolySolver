@@ -52,7 +52,6 @@ namespace SPARSE {
 		virtual int PrepareToSolveByMatrix(SparseMatrix A,
 			SparseVector b,
 			SparseVector x);
-		//int AddImplementation();
 	};
 
 	template <class Base>
@@ -121,6 +120,3 @@ namespace SPARSE {
 
 
 }
-
-//template class SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>;
-//template SPARSE::LinearSolver* SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>::get<SPARSE::LinearSolver>(SPARSE::SolverID);

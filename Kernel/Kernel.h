@@ -58,6 +58,5 @@ namespace KERNEL {
 		ProblemCase(std::string CN);
 		void start();
 		void Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
-		void print();
 	};
 }
