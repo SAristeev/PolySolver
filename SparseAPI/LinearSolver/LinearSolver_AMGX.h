@@ -1,6 +1,5 @@
 #pragma once
 #include "LinearSolver_IMPL.h"
-//#include <vector>
 #include <amgx_c.h>
 #include <amgx_config.h>
 #include <cuda_runtime.h>
@@ -9,8 +8,8 @@
 namespace SPARSE {
 	struct Settings_AMGX{
 		int n_configs;
-		//std::vector<std::string> configsAMGX;
-		std::string configAMGX;
+		std::vector<std::string> configsAMGX;
+		std::string configs_path;
 		int max_iter;
 		double tolerance;
 	};

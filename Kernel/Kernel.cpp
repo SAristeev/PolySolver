@@ -7,7 +7,6 @@
 
 
 namespace KERNEL {
-//#define SETTINGS_FROM_JSON(s) try{setting.s = }
 #if defined(_WIN32)
 #if !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN
@@ -67,13 +66,29 @@ namespace KERNEL {
 		catch (const std::exception& ex) {
 			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
 			std::cerr << ex.what() << std::endl;
-			throw std::exception("Cannot open file");
+			throw std::exception("Can't open file");
 		}
 		
 		InitLinearSolvers(LinearFactory);
-		for (auto solver : config["LinearProblem"]["solvers"]) {
-			AddLinearImplementation(LinearSolvers, LinearFactory, solver);
-			settings.solversName.push_back(solver);
+		try{
+			for (auto solver : config["LinearProblem"]["solvers"]) {
+				if (solver == "AMGX") {
+					settings.AMGX_copies = static_cast<int>(config["LinearProblem"]["AMGX_settings"]["n_configs"]);
+					for (int i = 0; i < settings.AMGX_copies; i++) {
+						AddLinearImplementation(LinearSolvers, LinearFactory, solver);
+						settings.solversName.push_back(solver);
+					}
+				}
+				else{
+					AddLinearImplementation(LinearSolvers, LinearFactory, solver);
+					settings.solversName.push_back(solver);
+				}				
+			}
+		}
+		catch (const std::exception& ex){
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			throw std::exception("Invalid solver name");
 		}
 		try{
 			settings.casePath = config["LinearProblem"]["case_path"];
@@ -83,7 +98,6 @@ namespace KERNEL {
 			std::cerr << ex.what() << std::endl;
 			throw std::exception("Invalid case name");
 		}
-		
 		try{
 			settings.caseName = config["LinearProblem"]["case_name"];
 		}
@@ -157,7 +171,7 @@ namespace KERNEL {
 
 	void ProblemCase::start() {
 		double start, stop;
-		size_t cur = 0;
+		int curAMGXsolver = 0;
 		std::ofstream resFile(settings.casePath + "/" + settings.caseName + "/" + settings.resFileName);
 		resFile << "SolverName" << ", " << "time";
 		if (settings.check_answer) {
@@ -166,7 +180,10 @@ namespace KERNEL {
 		}
 		resFile << std::endl;
 		for (auto solver : LinearSolvers) {
-			//TODO: what do with empty yelds in json
+			if (solver.first->getName() == "AMGX") {
+				solver.first->SetCurConfig(curAMGXsolver);
+				curAMGXsolver++;
+			}
 			solver.first->SetSettingsFromJSON(config["LinearProblem"]);
 			solver.first->PrepareToSolveByMatrix(A, b, x);
 
@@ -199,7 +216,6 @@ namespace KERNEL {
 				}
 				resFile << std::endl;
 			}
-			cur++;
 			x.Clear();
 		}
 	}

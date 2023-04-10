@@ -2,11 +2,71 @@
 
 namespace SPARSE {
     int LinearSolverAMGX::SetSettingsFromJSON(json settingsJSON) {
-        settings.n_configs = settingsJSON["AMGX_settings"]["n_configs"];
-        //settings.configsAMGX.push_back(settingsJSON["AMGX_settings"]["config"]);
-        settings.configAMGX = settingsJSON["AMGX_settings"]["config"];
-        settings.tolerance = settingsJSON["AMGX_settings"]["tolerance"];
-        settings.max_iter = settingsJSON["AMGX_settings"]["max_iter"];
+
+        try{
+            nrhs = settingsJSON["n_rhs"];
+        }
+        catch (const std::exception& ex) {
+            std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+            std::cerr << ex.what() << std::endl;
+            throw std::exception("Invalid n_rhs");
+        }
+        
+        try {
+            settings.configs_path = settingsJSON["AMGX_settings"]["configs_path"];
+        }
+        catch (const std::exception& ex) {
+            std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+            std::cerr << ex.what() << std::endl;
+            throw std::exception("Invalid AMGX configs_path");
+        }
+
+        try {
+            settings.n_configs = settingsJSON["AMGX_settings"]["n_configs"];
+        }
+        catch (std::exception &ex) {
+            std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+            std::cerr << ex.what() << std::endl;
+            std::cerr << "Setting default setting [LinearProblem][AMGX_settings][n_configs] = 1" << std::endl;
+            settings.n_configs = settingsJSON["AMGX_settings"]["n_configs"] = 1;
+        }
+        
+        try{
+            int cur_config = 0;
+            for (auto config : settingsJSON["AMGX_settings"]["configs"]) {
+                if (cur_config >= settings.n_configs) {
+                    break;
+                }
+                settings.configsAMGX.push_back(config);
+                cur_config++;
+            }
+            this->AddConfigToName(settings.configsAMGX.at(this->curConfig));
+        }
+        catch (const std::exception &ex)
+        {
+            std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+            throw std::exception("Invalid AMGX configname");
+        }
+
+        try{
+            settings.tolerance = settingsJSON["AMGX_settings"]["tolerance"];
+        }
+        catch (const std::exception& ex){
+            std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+            std::cerr << ex.what() << std::endl;
+            std::cerr << "Setting default setting [LinearProblem][AMGX_settings][tolerance] = 1e-6" << std::endl;
+            settings.tolerance = 1e-6;
+        }
+
+        try{
+            settings.max_iter = settingsJSON["AMGX_settings"]["max_iter"];
+        }
+        catch (const std::exception& ex){
+            std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+            std::cerr << ex.what() << std::endl;
+            std::cerr << "Setting default setting [LinearProblem][AMGX_settings][max_iter] = 100" << std::endl;
+            settings.max_iter = 100;
+        }
         return 0;
     };
 
@@ -48,7 +108,8 @@ namespace SPARSE {
 
         mode = AMGX_mode_dDDI;
 
-        AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, settings.configAMGX.c_str()));
+        std::string configName = settings.configs_path + "/" + settings.configsAMGX[this->curConfig] + ".json";
+        AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, configName.c_str()));
 
         //TODO: set precision
         
@@ -87,29 +148,9 @@ namespace SPARSE {
         AMGX_solver_solve(solver, _b, _x);
         AMGX_solver_get_status(solver, &status);
         AMGX_vector_download(_x, h_x);
-        if (status == AMGX_SOLVE_SUCCESS) {
-            /*AMGX_config_handle cfg1;
-            AMGX_resources_handle rsrc1;
-            AMGX_solver_handle solver1;
-
-            AMGX_matrix_handle _A1;
-            AMGX_vector_handle _b1, _x1;
-            AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg1, "C:/LIBS64/AMGX/INSTALL/lib/configs/AGGREGATION_my.json"));
-            AMGX_resources_create_simple(&rsrc1, cfg1);
-            AMGX_matrix_create(&_A1, rsrc1, mode);
-            AMGX_vector_create(&_x1, rsrc1, mode);
-            AMGX_vector_create(&_b1, rsrc1, mode);
-            AMGX_solver_create(&solver, rsrc1, mode, cfg1);
-            AMGX_matrix_upload_all(_A1, n, nnzA, 1, 1, h_RowsA, h_ColsA, h_ValsA, nullptr);
-            AMGX_vector_bind(_x1, _A1);
-            AMGX_vector_bind(_b1, _A1);
-
-            AMGX_vector_upload(_b1, n, block_dimx, h_b);
-            AMGX_vector_upload(_x1, n, block_dimx, h_x);
-            AMGX_solver_setup(solver, _A1);*/
+        /*if (status == AMGX_SOLVE_SUCCESS) {
             AMGX_solver_solve(solver, _b, _x);
-
-        }
+        }*/
         
 
         AMGX_unpin_memory(h_x);

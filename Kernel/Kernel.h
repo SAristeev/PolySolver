@@ -30,7 +30,7 @@ namespace KERNEL {
 
 		int n_rhs;
 		std::vector<double> time;
-		//double time;
+		int AMGX_copies = 0;
 
 		double absnorm1, absnorm2, absnorminf;
 		double relnorm1, relnorm2, relnorminf;

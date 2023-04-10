@@ -1,8 +1,9 @@
 #pragma once
 #include<map>
+#include<iostream>
 #include"../SparseAPI.h"
 #include"../../Kernel/json.hpp"
-//#include"../../Kernel/Kernel.h"
+
 
 
 namespace SPARSE {
@@ -26,6 +27,7 @@ namespace SPARSE {
 	class LinearSolver {
 	protected:
 		std::string solverName;
+		int curConfig;
 		int	   	n;
 		int	   	nnzA;
 		int	   	nrhs;
@@ -37,6 +39,9 @@ namespace SPARSE {
 	public:
 		LinearSolver(std::string SN) { solverName = SN; }
 		std::string getName() { return solverName; }
+		void AddConfigToName(std::string configName) { solverName = solverName + ": " + configName;
+	}
+		void SetCurConfig(int cur) { curConfig = cur; }
 		virtual int SetSettingsFromJSON(json settings) = 0;
 		virtual int SolveRightSide(SparseMatrix &A,
 			SparseVector  &b,
