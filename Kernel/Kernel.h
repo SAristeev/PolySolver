@@ -27,6 +27,7 @@ namespace KERNEL {
 		std::string casePath;
 		std::string resFileName;
 		std::vector<std::string> solversName;
+		std::vector<std::string> casesNames;
 
 		int n_rhs;
 		std::vector<double> time;
@@ -54,15 +55,9 @@ namespace KERNEL {
 		SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID> LinearFactory;
 		Settings settings;
 	public:
-		//ProblemCase(std::string CN, SPARSE::SolverID SID);
 		ProblemCase(std::string CN);
-		// TODO: create setSettings()
-		// void setSettings();
-		//void start(double& time);
 		void start();
-		//void start();
 		void Check(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
-		void CheckMKL(double& absnorm1, double& absnorm2, double& absnorminf, double& relnorm1, double& relnorm2, double& relnorminf);
 		void print();
 	};
 }

@@ -107,6 +107,7 @@ namespace SPARSE {
         MKL_INT idum = 0;
         MKL_INT phase = 11;
         MKL_INT error = 0;
+        
         //phase11
 
         initParams();
@@ -114,13 +115,14 @@ namespace SPARSE {
         pardiso(&_pt[0], (MKL_INT*)& maxfct, (MKL_INT*)&mnum, (MKL_INT*)&mtype, (MKL_INT*)&phase, (MKL_INT*)&n, 
             h_ValsA, (MKL_INT*)h_RowsA, (MKL_INT*)h_ColsA,
             (MKL_INT*)&idum, (MKL_INT*)&nrhs, (MKL_INT*)&_iparm[0], (MKL_INT*)&msglvl, &ddum, &ddum, (MKL_INT*)&error);
-        //phase22
         
+        //phase22
         phase = 22;
         pardiso(&_pt[0], (MKL_INT*)&maxfct, (MKL_INT*)&mnum, (MKL_INT*)&mtype, (MKL_INT*)&phase, (MKL_INT*)&n,
             h_ValsA, (MKL_INT*)h_RowsA, (MKL_INT*)h_ColsA,
             (MKL_INT*)&idum, (MKL_INT*)&nrhs, (MKL_INT*)&_iparm[0], (MKL_INT*)&msglvl, &ddum, &ddum, (MKL_INT*)&error);
 
+        //phase33
         phase = 33;
         pardiso(&_pt[0], (MKL_INT*)&maxfct, (MKL_INT*)&mnum, (MKL_INT*)&mtype, (MKL_INT*)&phase, (MKL_INT*)&n,
             h_ValsA, (MKL_INT*)h_RowsA, (MKL_INT*)h_ColsA,

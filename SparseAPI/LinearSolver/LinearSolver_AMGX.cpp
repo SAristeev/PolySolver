@@ -1,5 +1,5 @@
 #include "LinearSolver_AMGX.h"
-
+#include <sstream>
 namespace SPARSE {
     int LinearSolverAMGX::SetSettingsFromJSON(json settingsJSON) {
 
@@ -111,9 +111,14 @@ namespace SPARSE {
         std::string configName = settings.configs_path + "/" + settings.configsAMGX[this->curConfig] + ".json";
         AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, configName.c_str()));
 
-        //TODO: set precision
-        
 
+        std::ostringstream tolstream;
+        tolstream << settings.tolerance;
+        std::string tolstr = "config_version=2, main: tolerance=" + tolstream.str();
+        std::string maxitstr = "config_version=2, main: max_iters=" + std::to_string(settings.max_iter);
+
+        AMGX_config_add_parameters(&cfg, tolstr.c_str());
+        AMGX_config_add_parameters(&cfg, maxitstr.c_str());
 
         AMGX_resources_create_simple(&rsrc, cfg);
         AMGX_matrix_create(&_A, rsrc, mode);
@@ -148,10 +153,6 @@ namespace SPARSE {
         AMGX_solver_solve(solver, _b, _x);
         AMGX_solver_get_status(solver, &status);
         AMGX_vector_download(_x, h_x);
-        /*if (status == AMGX_SOLVE_SUCCESS) {
-            AMGX_solver_solve(solver, _b, _x);
-        }*/
-        
 
         AMGX_unpin_memory(h_x);
         AMGX_unpin_memory(h_b);

@@ -89,10 +89,10 @@ namespace SPARSE {
 		std::vector<int> Cols;
 		int n;
 		int nnz;
-		void Clear() { Vals.clear(); RowsCSR.clear(); RowsCOO.clear(); Cols.clear(); n = 0; nnz = 0; }
 	public:
 		SparseMatrix() { Clear(); }
 		~SparseMatrix() { Clear(); }
+		void Clear() { Vals.clear(); RowsCSR.clear(); RowsCOO.clear(); Cols.clear(); n = 0; nnz = 0; }
 		void CopyData(double* array, int len) { Clear(); Vals.insert(Vals.end(), &array[0], &array[len]); }
 		void GetInfo(int&n, int&nnz) { n = this->n; nnz = this->nnz; }
 		void GetDataCSR(double**Vals, int** RowsCSR, int**Cols) { *Vals = this->Vals.data(); *RowsCSR = this->RowsCSR.data(); *Cols = this->Cols.data(); }
@@ -118,8 +118,6 @@ namespace SPARSE {
 		~SparseVector() { Clear(); }
 		int SetOnes(int n, int nrhs);
 		void Clear() { Vals.clear(); n = 0; nrhs = 0; }
-		//void SetNrhs(int nrhs) { this->nrhs = nrhs; }
-		//void SetData(double* array, int len) { Clear(); n = len; nrhs = 1; Vals.insert(Vals.end(), &array[0], &array[len]); }
 		int AddData(double* array, int len) {
 			if (n != 0 && n != len) {
 				return -1;
@@ -137,8 +135,6 @@ namespace SPARSE {
 		int GetData(double** Vals) { *Vals = this->Vals.data(); return 0; }
 		int GetData(size_t i, double** Vals) { *Vals = this->Vals.data() + n*i; return 0; }
 		int GetInfo(int &n, int& nrhs) { n = this->n; nrhs = this->nrhs; return 0; }
-
-		//int fread(std::string FileName);
 		int fprint(int n, std::string FileName);
 	};
 
@@ -154,9 +150,6 @@ namespace SPARSE {
 		SparseVectorInt() { Clear(); }
 		~SparseVectorInt() { Clear(); }
 		int SetOnes(int n, int nrhs);
-
-		//void SetNrhs(int nrhs) { this->nrhs = nrhs; }
-		//void SetData(double* array, int len) { Clear(); n = len; nrhs = 1; Vals.insert(Vals.end(), &array[0], &array[len]); }
 		int AddData(int* array, int len) {
 			if (n != 0 && n != len) {
 				return -1;
@@ -174,7 +167,6 @@ namespace SPARSE {
 		int GetData(int** Vals) { *Vals = this->Vals.data(); return 0; }
 		int GetInfo(int& n, int& nrhs) { n = this->n; nrhs = this->nrhs; return 0; }
 
-		//int fread(std::string FileName);
 		int fprint(int n, std::string FileName);
 	};
 }

@@ -1,6 +1,5 @@
  #include"SparseAPI.h"
 
-
 namespace SPARSE{
 	int SparseMatrix::freadCSR(std::string FileName)
 	{
@@ -157,32 +156,6 @@ namespace SPARSE{
 		return 0;
 	}
 
-
-
-	/*int SparseVector::fread(std::string FileName)
-	{
-		Clear();
-		std::ifstream file(FileName);
-
-		if (!file.is_open())
-		{
-			return -1;
-		}
-
-		file >> n;
-
-		Vals.resize(n);
-
-		for (int i = 0; i < n; i++)
-		{
-			file >> Vals[i];
-		}
-
-		file.close();
-
-		return 0;
-	}*/
-	
 	int SparseVector::fprint(int n, std::string FileName)
 	{
 		std::ofstream file(FileName);
