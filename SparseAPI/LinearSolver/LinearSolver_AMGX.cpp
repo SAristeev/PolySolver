@@ -2,7 +2,8 @@
 
 namespace SPARSE {
     int LinearSolverAMGX::SetSettingsFromJSON(json settingsJSON) {
-        nrhs = settingsJSON["n_rhs"];
+        settings.n_configs = settingsJSON["AMGX_settings"]["n_configs"];
+        //settings.configsAMGX.push_back(settingsJSON["AMGX_settings"]["config"]);
         settings.configAMGX = settingsJSON["AMGX_settings"]["config"];
         settings.tolerance = settingsJSON["AMGX_settings"]["tolerance"];
         settings.max_iter = settingsJSON["AMGX_settings"]["max_iter"];
@@ -85,7 +86,31 @@ namespace SPARSE {
         AMGX_solver_setup(solver, _A);
         AMGX_solver_solve(solver, _b, _x);
         AMGX_solver_get_status(solver, &status);
-        AMGX_vector_download(_x,h_x);
+        AMGX_vector_download(_x, h_x);
+        if (status == AMGX_SOLVE_SUCCESS) {
+            /*AMGX_config_handle cfg1;
+            AMGX_resources_handle rsrc1;
+            AMGX_solver_handle solver1;
+
+            AMGX_matrix_handle _A1;
+            AMGX_vector_handle _b1, _x1;
+            AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg1, "C:/LIBS64/AMGX/INSTALL/lib/configs/AGGREGATION_my.json"));
+            AMGX_resources_create_simple(&rsrc1, cfg1);
+            AMGX_matrix_create(&_A1, rsrc1, mode);
+            AMGX_vector_create(&_x1, rsrc1, mode);
+            AMGX_vector_create(&_b1, rsrc1, mode);
+            AMGX_solver_create(&solver, rsrc1, mode, cfg1);
+            AMGX_matrix_upload_all(_A1, n, nnzA, 1, 1, h_RowsA, h_ColsA, h_ValsA, nullptr);
+            AMGX_vector_bind(_x1, _A1);
+            AMGX_vector_bind(_b1, _A1);
+
+            AMGX_vector_upload(_b1, n, block_dimx, h_b);
+            AMGX_vector_upload(_x1, n, block_dimx, h_x);
+            AMGX_solver_setup(solver, _A1);*/
+            AMGX_solver_solve(solver, _b, _x);
+
+        }
+        
 
         AMGX_unpin_memory(h_x);
         AMGX_unpin_memory(h_b);

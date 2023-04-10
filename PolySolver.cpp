@@ -4,11 +4,10 @@
 #include"SparseAPI/SparseAPI.h"
 
 
+
 int main(int argc, char** argv)
 {
-    using namespace KERNEL;
-    
-    double time = 0;
+    using namespace KERNEL;  
     ProblemCase Case("C:/WorkDirectory/config.json");
     Case.start();
     

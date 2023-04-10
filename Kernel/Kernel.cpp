@@ -3,11 +3,11 @@
 
 #include<map>
 #include<cusparse.h>
-
+#include<exception>
 
 
 namespace KERNEL {
-
+//#define SETTINGS_FROM_JSON(s) try{setting.s = }
 #if defined(_WIN32)
 #if !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN
@@ -61,24 +61,97 @@ namespace KERNEL {
 	ProblemCase::ProblemCase(std::string ConfigName) {
 		//TODO: create individual settings
 		std::ifstream file(ConfigName);
-		config = json::parse(file);
+		try {
+			config = json::parse(file);
+		}
+		catch (const std::exception& ex) {
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			throw std::exception("Cannot open file");
+		}
+		
 		InitLinearSolvers(LinearFactory);
 		for (auto solver : config["LinearProblem"]["solvers"]) {
 			AddLinearImplementation(LinearSolvers, LinearFactory, solver);
 			settings.solversName.push_back(solver);
 		}
-		settings.caseName = config["LinearProblem"]["case_name"];
-		settings.casePath = config["LinearProblem"]["case_path"];
+		try{
+			settings.casePath = config["LinearProblem"]["case_path"];
+		}
+		catch (const std::exception& ex){
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			throw std::exception("Invalid case name");
+		}
 		
+		try{
+			settings.caseName = config["LinearProblem"]["case_name"];
+		}
+		catch (const std::exception& ex) {
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			throw std::exception("Invalid case name");
+		}
+				
 		A.freadCSR(settings.casePath + "/" + settings.caseName + "/A.txt");
 		b.AddData(settings.casePath + "/" + settings.caseName + "/B.vec");
 
-		settings.n_rhs = config["LinearProblem"]["n_rhs"] - 1; // zero-indexing
-		settings.print_answer = config["LinearProblem"]["print_answer"];
-		settings.print_time = config["LinearProblem"]["print_time"];
-		settings.check_answer = config["LinearProblem"]["check_answer"];
-		settings.print_to_file = config["LinearProblem"]["print_to_file"];
-		settings.resFileName = config["LinearProblem"]["results_file_name"];
+		try{
+			settings.n_rhs = static_cast<int>(config["LinearProblem"]["n_rhs"]) - 1; // zero-indexing
+		}
+		catch (const std::exception& ex) {
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			std::cerr << "Setting default setting [LinearProblem][n_rhs] = 1" << std::endl;
+			settings.n_rhs = 0;
+		}
+
+		try{
+			settings.print_answer = config["LinearProblem"]["print_answer"];
+		}
+		catch(const std::exception& ex){
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			std::cerr << "Setting default setting [LinearProblem][print_answer] = false" << std::endl;
+			settings.print_answer = false;
+		}
+
+		try{
+			settings.print_time = config["LinearProblem"]["print_time"];
+		}
+		catch (const std::exception& ex)
+		{
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			std::cerr << "Setting default setting [LinearProblem][print_time] = true" << std::endl;
+			settings.print_time = true;
+		}
+		try{
+			settings.check_answer = config["LinearProblem"]["check_answer"];
+		}
+		catch (const std::exception& ex){
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			std::cerr << "Setting default setting [LinearProblem][check_answer] = true" << std::endl;
+			settings.check_answer = true;
+		}
+		try{
+			settings.print_to_file = config["LinearProblem"]["print_to_file"];
+		}
+		catch (const std::exception& ex) {
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			std::cerr << "Setting default setting [LinearProblem][print_to_file] = true" << std::endl;
+			settings.print_to_file = true;
+		}
+		try{ settings.resFileName = config["LinearProblem"]["results_file_name"]; 
+		}
+		catch (const std::exception& ex) {
+			std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+			std::cerr << ex.what() << std::endl;
+			std::cerr << "Setting default setting [LinearProblem][resFileName] = true" << std::endl;
+			settings.resFileName = "res.csv";
+		}
 	}
 
 
