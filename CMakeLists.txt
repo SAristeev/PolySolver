@@ -10,9 +10,6 @@ option(USE_cuSOLVER "find and enable cuSOLVER" OFF)
 option(USE_GINKGO "find and enable Ginkgo" OFF)
 option(USE_AMGX "find and enable AMGX" OFF)
 option(USE_PETSc "find and enable PETSc" OFF)
-option(USE_PARDISO "find and enable PARDISO" OFF)
-
-
 
 
 if(NOT USE_GPU)
@@ -41,10 +38,6 @@ endif(USE_GINKGO)
 
 if(USE_AMGX)
 	message("\nFIND AMGX: " $ENV{AMGX_DIR})
-	find_package(MPI)
-	if(MPI_FOUND)
-		message("     MPI_INCLUDE_PATH: " ${MPI_INCLUDE_PATH})
-	endif(MPI_FOUND)
 endif(USE_AMGX)
 
 
@@ -59,9 +52,6 @@ endif(USE_cuSOLVER)
 
 if(USE_AMGX)
 	target_include_directories(PolySolver PRIVATE "$ENV{AMGX_DIR}/include")
-	if(MPI_FOUND)
-		target_include_directories(PolySolver PRIVATE "${MPI_INCLUDE_PATH}")
-	endif(MPI_FOUND)
 endif(USE_AMGX)
 
 

@@ -114,11 +114,14 @@ namespace SPARSE {
 
         std::ostringstream tolstream;
         tolstream << settings.tolerance;
+
         std::string tolstr = "config_version=2, main: tolerance=" + tolstream.str();
         std::string maxitstr = "config_version=2, main: max_iters=" + std::to_string(settings.max_iter);
 
         AMGX_config_add_parameters(&cfg, tolstr.c_str());
         AMGX_config_add_parameters(&cfg, maxitstr.c_str());
+        //AMGX_config_add_parameters(&cfg, "config_version=2, main: obtain_timings=0");
+        //AMGX_config_add_parameters(&cfg, "config_version=2, main: print_solve_stats=0");
 
         AMGX_resources_create_simple(&rsrc, cfg);
         AMGX_matrix_create(&_A, rsrc, mode);

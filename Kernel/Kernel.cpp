@@ -2,7 +2,6 @@
 #include<iostream>
 
 #include<map>
-#include<cusparse.h>
 #include<exception>
 
 
@@ -47,10 +46,14 @@ namespace KERNEL {
 #endif
 
 	void InitLinearSolvers(SPARSE::ObjectSolverFactory<SPARSE::LinearSolver, SPARSE::SolverID>& LinearFactory) {
+#ifdef USE_cuSOLVER
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERSP>(SPARSE::SolverID::cuSOLVERSP);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF>(SPARSE::SolverID::cuSOLVERRF);
 		LinearFactory.add<SPARSE::LinearSolvercuSOLVERRF_ALLGPU>(SPARSE::SolverID::cuSOLVERRF_ALLGPU);
+#endif // USE_cuSOLVER
+#ifdef USE_AMGX
 		LinearFactory.add<SPARSE::LinearSolverAMGX>(SPARSE::SolverID::AMGX);
+#endif // USE_AMGX
 		LinearFactory.add<SPARSE::LinearSolverPARDISO>(SPARSE::SolverID::PARDISO);
 	}
 	

@@ -7,8 +7,12 @@
 #include "json.hpp"
 #include "../SparseAPI/SparseAPI.h"
 #include "../SparseAPI/LinearSolver/LinearSolver_IMPL.h"
-#include "../SparseAPI/LinearSolver/LinearSolver_AMGX.h"
+#ifdef USE_cuSOLVER
 #include "../SparseAPI/LinearSolver/LinearSolver_cuSOLVER.h"
+#endif // USE_cuSOLVER
+#ifdef USE_AMGX
+#include "../SparseAPI/LinearSolver/LinearSolver_AMGX.h"
+#endif // USE_AMGX
 #include "../SparseAPI/LinearSolver/LinearSolver_PARDISO.h"
 
 

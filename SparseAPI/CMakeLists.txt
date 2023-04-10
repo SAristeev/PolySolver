@@ -14,6 +14,10 @@ file(GLOB SparseAPI_SRCS_ALL
 	EigenSolver/*.cpp
 	)
 
+
+source_group(SparseAPI FILES SparseAPI.h)
+source_group(SparseAPI FILES SparseAPI.cpp)
+
 source_group(LinearSolver FILES LinearSolver/LinearSolver_IMPL.h)
 source_group(LinearSolver FILES LinearSolver/LinearSolver_IMPL.cpp)
 
@@ -41,26 +45,24 @@ endif(USE_GINKGO)
 add_library(SparseAPI ${SparseAPI_SRCS_ALL} ${SparseAPI_HDRS_ALL})
 
 
-
-
-
-if(USE_PARDISO)
-	target_include_directories(SparseAPI PRIVATE ${MKL_INCLUDE_DIR})
-	target_link_libraries(SparseAPI PRIVATE ${MKL_LIBRARIES})
-endif(USE_PARDISO)
+target_include_directories(SparseAPI PRIVATE ${MKL_INCLUDE_DIR})
+target_link_libraries(SparseAPI PRIVATE ${MKL_LIBRARIES})
 
 if(USE_cuSOLVER)
+	add_definitions(-DUSE_cuSOLVER)
 	target_include_directories(SparseAPI PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 	target_link_libraries(SparseAPI PRIVATE CUDA::cudart CUDA::cusolver CUDA::cusparse)
 endif(USE_cuSOLVER)
 
-if(USE_AMGX)	
+if(USE_AMGX)
+	add_definitions(-DUSE_AMGX)
 	target_include_directories(SparseAPI PRIVATE "$ENV{AMGX_DIR}/include")
 	target_link_libraries(SparseAPI PRIVATE "$ENV{AMGX_DIR}/lib/amgxsh.lib")
 	target_link_libraries(SparseAPI PRIVATE "$ENV{AMGX_DIR}/lib/amgxsh.lib")
 endif(USE_AMGX)
 
 if(USE_GINKGO)
+	add_definitions(-DUSE_GINKGO)
 	target_include_directories(SparseAPI PRIVATE ${Ginkgo_INCLUDE_DIR})
 	target_link_libraries(SparseAPI PRIVATE "${Ginkgo_LIBRARIES_DIR}/ginkgo.lib" "${Ginkgo_LIBRARIES_DIR}/ginkgo_cuda.lib")
 endif(USE_GINKGO)

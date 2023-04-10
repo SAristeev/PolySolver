@@ -19,10 +19,6 @@ namespace SPARSE {
 		PARDISO = 6,
 		ALL = 99
 	};
-	//std::string SolverID2String(SolverID ID);
-	
-
-
 
 	class LinearSolver {
 	protected:
