@@ -101,7 +101,7 @@ namespace SPARSE {
         
         double ddum = 0.0;
         MKL_INT maxfct = 1;
-        MKL_INT msglvl = 0;
+        MKL_INT msglvl = 1;
         MKL_INT mnum = 1;
         MKL_INT mtype = 11;
         MKL_INT idum = 0;

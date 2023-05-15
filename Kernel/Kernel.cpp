@@ -6,7 +6,7 @@
 
 
 namespace KERNEL {
-#if defined(_WIN32)
+#if defined(WIN32)
 #if !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -169,7 +169,7 @@ namespace KERNEL {
 
 	void ProblemCase::start() {
 		double start, stop;
-		int curAMGXsolver = 0;
+		
 		std::ofstream resFile(settings.casePath + "/" + settings.resFileName + ".csv");
 		resFile  << "CaseName" << ", " << "SolverName" << ", " << "time";
 		if (settings.check_answer) {
@@ -179,11 +179,23 @@ namespace KERNEL {
 		resFile << std::endl;
 
 		for (auto caseName : settings.casesNames) {
+			int curAMGXsolver = 0;
 			A.freadCSR(settings.casePath + "/" + caseName + "/A.txt");
 			b.AddData(settings.casePath + "/" + caseName + "/B.vec");
 			for (auto solver : LinearSolvers) {
 				if (solver.first->getName() == "AMGX") {
-					solver.first->SetCurConfig(curAMGXsolver);
+					if (caseName == *(settings.casesNames.begin())) {
+						solver.first->SetCurConfig(curAMGXsolver);
+						try {
+							solver.first->AddConfigToName(config["LinearProblem"]["AMGX_settings"]["configs"][curAMGXsolver]);
+						}
+						catch (const std::exception& ex)
+						{
+							std::cerr << ex.what() << std::endl;
+							std::cerr << "Error at parameter in JSON PolySolver config" << std::endl;
+							throw std::exception("Invalid AMGX configname");
+						}
+					}
 					curAMGXsolver++;
 				}
 				solver.first->SetSettingsFromJSON(config["LinearProblem"]);

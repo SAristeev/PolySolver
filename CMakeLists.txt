@@ -43,7 +43,6 @@ endif(USE_AMGX)
 
 add_executable(PolySolver "PolySolver.cpp")
 
-
 target_include_directories(PolySolver PRIVATE ${MKL_INCLUDE_DIR})
 
 if(USE_cuSOLVER)

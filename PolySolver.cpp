@@ -9,7 +9,8 @@ int main(int argc, char** argv)
 {
     using namespace KERNEL;
 	try{
-		ProblemCase Case("C:/WorkDirectory/config.json");
+		std::system("color A");
+		ProblemCase Case("C:/WorkDirectory/PolySolver/config.json");
 		Case.start();
 	}
 	catch (const std::exception& ex){

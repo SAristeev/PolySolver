@@ -8,7 +8,7 @@ namespace SPARSE{
 
 		if (!file.is_open()) 
 		{
-			return -1;
+			throw std::exception(std::string("No such file: " + FileName + "\nCan't open matrix").c_str());
 		}
 
 		file >> n >> nnz;
@@ -132,6 +132,7 @@ namespace SPARSE{
 
 		if (!file.is_open())
 		{
+			throw std::exception((std::string("No such file: " + FileName + "\nCan't open vector")).c_str());
 			return -1;
 		}
 

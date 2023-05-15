@@ -1,6 +1,20 @@
 #include "LinearSolver_AMGX.h"
 #include <sstream>
 namespace SPARSE {
+
+    void applyAMGXSettings(AMGX_config_handle& cfg){
+        AMGX_config_add_parameters(&cfg, "config_version=2, print_solve_stats=1");
+        AMGX_config_add_parameters(&cfg, "config_version=2, solver(MY)=PCG");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:print_solve_stats=1");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:obtain_timings=1");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:monitor_residual=1");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:convergence=ABSOLUTE");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:tolerance=1e-9");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:norm=L2");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:max_iters=100000");
+        AMGX_config_add_parameters(&cfg, "config_version=2, MY:preconditioner(MY_PREC)=NOSOLVER");        
+    }
+
     int LinearSolverAMGX::SetSettingsFromJSON(json settingsJSON) {
 
         try{
@@ -40,7 +54,7 @@ namespace SPARSE {
                 settings.configsAMGX.push_back(config);
                 cur_config++;
             }
-            this->AddConfigToName(settings.configsAMGX.at(this->curConfig));
+            //this->AddConfigToName(settings.configsAMGX.at(this->curConfig));
         }
         catch (const std::exception &ex)
         {
@@ -108,20 +122,26 @@ namespace SPARSE {
 
         mode = AMGX_mode_dDDI;
 
-        std::string configName = settings.configs_path + "/" + settings.configsAMGX[this->curConfig] + ".json";
-        AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, configName.c_str()));
 
+        AMGX_SAFE_CALL(AMGX_config_create(&cfg, "config_version=2"));
 
-        std::ostringstream tolstream;
-        tolstream << settings.tolerance;
+        applyAMGXSettings(cfg);
 
-        std::string tolstr = "config_version=2, main: tolerance=" + tolstream.str();
-        std::string maxitstr = "config_version=2, main: max_iters=" + std::to_string(settings.max_iter);
-
-        AMGX_config_add_parameters(&cfg, tolstr.c_str());
-        AMGX_config_add_parameters(&cfg, maxitstr.c_str());
-        //AMGX_config_add_parameters(&cfg, "config_version=2, main: obtain_timings=0");
-        //AMGX_config_add_parameters(&cfg, "config_version=2, main: print_solve_stats=0");
+        //std::string configName = settings.configs_path + "/" + settings.configsAMGX[this->curConfig] + ".json";
+        //AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, configName.c_str()));
+        //
+        //
+        //std::ostringstream tolstream;
+        //tolstream << settings.tolerance;
+        //
+        //std::string tolstr = "config_version=2, main: tolerance=" + tolstream.str();
+        //std::string maxitstr = "config_version=2, main: max_iters=" + std::to_string(settings.max_iter);
+        //
+        //AMGX_config_add_parameters(&cfg, tolstr.c_str());
+        //AMGX_config_add_parameters(&cfg, maxitstr.c_str());
+        //AMGX_config_add_parameters(&cfg, "config_version=2, main: convergence=ABSOLUTE");
+        ////AMGX_config_add_parameters(&cfg, "config_version=2, main: obtain_timings=0");
+        ////AMGX_config_add_parameters(&cfg, "config_version=2, main: print_solve_stats=0");
 
         AMGX_resources_create_simple(&rsrc, cfg);
         AMGX_matrix_create(&_A, rsrc, mode);
@@ -174,7 +194,7 @@ namespace SPARSE {
         /* shutdown and exit */
         AMGX_SAFE_CALL(AMGX_finalize());
 
-        gpuErrchk(cudaDeviceReset());
+        cudaDeviceReset();
         return 0;
 	}
     
