@@ -1,7 +1,7 @@
 #include<iostream>
 #include<cstdlib>
-#include"Kernel/Kernel.h"
-#include"SparseAPI/SparseAPI.h"
+#include"Solvers/kernel.h"
+#include"Solvers/sparse.h"
 
 
 

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
-project(PolySolver VERSION 0.1.0 LANGUAGES CXX C)
+cmake_minimum_required(VERSION 3.17.0 FATAL_ERROR)
+project(PolySolver VERSION 0.2.0 LANGUAGES CXX C)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 set (CMAKE_CXX_STANDARD 20)
 
@@ -56,9 +56,5 @@ if(USE_AMGX)
 	target_include_directories(PolySolver PRIVATE "$ENV{AMGX_DIR}/include")
 endif(USE_AMGX)
 
-
-add_subdirectory("SparseAPI")
-target_link_libraries(PolySolver LINK_PUBLIC SparseAPI)
-
-add_subdirectory("Kernel")
-target_link_libraries(PolySolver LINK_PUBLIC Kernel)
+add_subdirectory("Solvers")
+target_link_libraries(PolySolver LINK_PUBLIC Solvers)

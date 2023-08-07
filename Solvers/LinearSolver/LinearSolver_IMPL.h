@@ -1,8 +1,8 @@
 #pragma once
 #include<map>
 #include<iostream>
-#include"../SparseAPI.h"
-#include"../../Kernel/json.hpp"
+#include"../sparse.h"
+#include"../json.hpp"
 
 
 
