@@ -125,23 +125,23 @@ namespace SPARSE {
 
         AMGX_SAFE_CALL(AMGX_config_create(&cfg, "config_version=2"));
 
-        applyAMGXSettings(cfg);
+        //applyAMGXSettings(cfg);
 
-        //std::string configName = settings.configs_path + "/" + settings.configsAMGX[this->curConfig] + ".json";
-        //AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, configName.c_str()));
-        //
-        //
-        //std::ostringstream tolstream;
-        //tolstream << settings.tolerance;
-        //
-        //std::string tolstr = "config_version=2, main: tolerance=" + tolstream.str();
-        //std::string maxitstr = "config_version=2, main: max_iters=" + std::to_string(settings.max_iter);
-        //
-        //AMGX_config_add_parameters(&cfg, tolstr.c_str());
-        //AMGX_config_add_parameters(&cfg, maxitstr.c_str());
-        //AMGX_config_add_parameters(&cfg, "config_version=2, main: convergence=ABSOLUTE");
-        ////AMGX_config_add_parameters(&cfg, "config_version=2, main: obtain_timings=0");
-        ////AMGX_config_add_parameters(&cfg, "config_version=2, main: print_solve_stats=0");
+        std::string configName = settings.configs_path + "/" + settings.configsAMGX[this->curConfig] + ".json";
+        AMGX_SAFE_CALL(AMGX_config_create_from_file(&cfg, configName.c_str()));
+        
+        
+        std::ostringstream tolstream;
+        tolstream << settings.tolerance;
+        
+        std::string tolstr = "config_version=2, main: tolerance=" + tolstream.str();
+        std::string maxitstr = "config_version=2, main: max_iters=" + std::to_string(settings.max_iter);
+        
+        AMGX_config_add_parameters(&cfg, tolstr.c_str());
+        AMGX_config_add_parameters(&cfg, maxitstr.c_str());
+        AMGX_config_add_parameters(&cfg, "config_version=2, main: convergence=ABSOLUTE");
+        //AMGX_config_add_parameters(&cfg, "config_version=2, main: obtain_timings=0");
+        //AMGX_config_add_parameters(&cfg, "config_version=2, main: print_solve_stats=0");
 
         AMGX_resources_create_simple(&rsrc, cfg);
         AMGX_matrix_create(&_A, rsrc, mode);
@@ -171,6 +171,7 @@ namespace SPARSE {
         AMGX_vector_bind(_b, _A);
 
         AMGX_vector_upload(_b, n, block_dimx, h_b);
+        
         AMGX_vector_set_zero(_x, n, block_dimx);
         AMGX_solver_setup(solver, _A);
         AMGX_solver_solve(solver, _b, _x);

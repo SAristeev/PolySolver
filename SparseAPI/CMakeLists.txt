@@ -2,18 +2,12 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 set (CMAKE_CXX_STANDARD 20)
 
-file(GLOB SparseAPI_HDRS_ALL
-	*.h
-	LinearSolver/*.h
-	EigenSolver/*.h
-	)
 
-file(GLOB SparseAPI_SRCS_ALL
-	*.cpp
-	LinearSolver/*.cpp
-	EigenSolver/*.cpp
-	)
+file(GLOB SparseAPI_SRCS_ALL SparseAPI.cpp ${SparseAPI_SRCS_ALL})
+file(GLOB SparseAPI_HDRS_ALL SparseAPI.h   ${SparseAPI_HDRS_ALL})
 
+file(GLOB SparseAPI_SRCS_ALL LinearSolver/LinearSolver_IMPL.cpp ${SparseAPI_SRCS_ALL})
+file(GLOB SparseAPI_HDRS_ALL LinearSolver/LinearSolver_IMPL.h   ${SparseAPI_HDRS_ALL})
 
 source_group(SparseAPI FILES SparseAPI.h)
 source_group(SparseAPI FILES SparseAPI.cpp)
@@ -22,16 +16,25 @@ source_group(LinearSolver FILES LinearSolver/LinearSolver_IMPL.h)
 source_group(LinearSolver FILES LinearSolver/LinearSolver_IMPL.cpp)
 
 if(USE_PARDISO)
+	file(GLOB SparseAPI_SRCS_ALL LinearSolver/LinearSolver_PARDISO.cpp ${SparseAPI_SRCS_ALL})
+	file(GLOB SparseAPI_HDRS_ALL LinearSolver/LinearSolver_PARDISO.h   ${SparseAPI_HDRS_ALL})
+
 	source_group(LinearSolver FILES LinearSolver/LinearSolver_PARDISO.h)
 	source_group(LinearSolver FILES LinearSolver/LinearSolver_PARDISO.cpp)
 endif(USE_PARDISO)
 
 if(USE_cuSOLVER)
+	file(GLOB SparseAPI_SRCS_ALL LinearSolver/LinearSolver_cuSOLVER.cpp ${SparseAPI_SRCS_ALL})
+	file(GLOB SparseAPI_HDRS_ALL LinearSolver/LinearSolver_cuSOLVER.h   ${SparseAPI_HDRS_ALL})
+
 	source_group(LinearSolver FILES LinearSolver/LinearSolver_cuSOLVER.h)
 	source_group(LinearSolver FILES LinearSolver/LinearSolver_cuSOLVER.cpp)
 endif(USE_cuSOLVER)
 
 if(USE_AMGX)
+	file(GLOB SparseAPI_SRCS_ALL LinearSolver/LinearSolver_AMGX.cpp ${SparseAPI_SRCS_ALL})
+	file(GLOB SparseAPI_HDRS_ALL LinearSolver/LinearSolver_AMGX.h   ${SparseAPI_HDRS_ALL})
+
 	source_group(LinearSolver FILES LinearSolver/LinearSolver_AMGX.h)
 	source_group(LinearSolver FILES LinearSolver/LinearSolver_AMGX.cpp)
 endif(USE_AMGX)
@@ -52,6 +55,9 @@ if(USE_cuSOLVER)
 	add_definitions(-DUSE_cuSOLVER)
 	target_include_directories(SparseAPI PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 	target_link_libraries(SparseAPI PRIVATE CUDA::cudart CUDA::cusolver CUDA::cusparse)
+elseif(USE_AMGX)
+	target_include_directories(SparseAPI PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+	target_link_libraries(SparseAPI PRIVATE CUDA::cudart)
 endif(USE_cuSOLVER)
 
 if(USE_AMGX)
