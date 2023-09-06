@@ -13,14 +13,24 @@ namespace SPARSE {
 		int max_iter;
 		double tolerance;
 	};
+
 	class LinearSolverAMGX : public LinearSolver {
 		Settings_AMGX settings;
 	public:
 		LinearSolverAMGX(): LinearSolver("AMGX") {}
-		int SolveRightSide(SparseMatrix& A,
-			SparseVector& b,
-			SparseVector& x) final;
+		int SolveRightSide(SparseMatrix<int, double>& A,
+			SparseVector<double>& b,
+			SparseVector<double>& x) final;
 		virtual int SetSettingsFromJSON(json settings) final;
 	};
 	
+}
+
+namespace SOLVER {
+	class LinearSolverAMGX_32_d : public LinearSolver {
+
+	public:
+		LinearSolverAMGX_32_d() : LinearSolver("AMGX") {};
+		int Solve(const SPARSE::Case<int, double>& rhs);
+	};
 }

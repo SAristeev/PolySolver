@@ -6,9 +6,9 @@ namespace SPARSE {
 		return 1;
 	}
 
-	int LinearSolver::PrepareToSolveByMatrix(SparseMatrix A,
-		SparseVector b,
-		SparseVector x) {
+	int LinearSolver::PrepareToSolveByMatrix(SparseMatrix<int, double> A,
+		SparseVector<double> b,
+		SparseVector<double> x) {
 
 		return IsReadyToSolve();
 	}
@@ -32,4 +32,8 @@ namespace SPARSE {
 		LinearSolvers.insert({ LinearFactory.get(SID), SID });
 	}
 
+}
+
+
+namespace SOLVER {
 }

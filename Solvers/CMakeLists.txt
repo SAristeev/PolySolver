@@ -1,71 +1,72 @@
 cmake_minimum_required(VERSION 3.17.0 FATAL_ERROR)
 
-set (CMAKE_CXX_STANDARD 20)
-
-file(GLOB Solvers_SRCS_ALL kernel.cpp ${Solvers_SRCS_ALL})
-file(GLOB Solvers_HDRS_ALL kernel.h   ${Solvers_HDRS_ALL})
-
 source_group(Kernel FILES kernel.h)
 source_group(Kernel FILES kernel.cpp)
-
-
-file(GLOB Solvers_HDRS_ALL sparse.h   ${Solvers_HDRS_ALL})
-file(GLOB Solvers_SRCS_ALL sparse_vector.cpp ${Solvers_SRCS_ALL})
-file(GLOB Solvers_SRCS_ALL sparse_matrix.cpp ${Solvers_SRCS_ALL})
-
-source_group(Sparse FILES sparse.h)
-source_group(Sparse FILES sparse_vector.cpp)
-source_group(Sparse FILES sparse_matrix.cpp)
-
-
-
-file(GLOB Solvers_SRCS_ALL LinearSolver/LinearSolver_IMPL.cpp ${Solvers_SRCS_ALL})
-file(GLOB Solvers_HDRS_ALL LinearSolver/LinearSolver_IMPL.h   ${Solvers_HDRS_ALL})
-
 source_group(LinearLib FILES LinearSolver/LinearSolver_IMPL.h)
 source_group(LinearLib FILES LinearSolver/LinearSolver_IMPL.cpp)
-if(USE_PARDISO)
-	file(GLOB Solvers_SRCS_ALL LinearSolver/LinearSolver_PARDISO.cpp ${Solvers_SRCS_ALL})
-	file(GLOB Solvers_HDRS_ALL LinearSolver/LinearSolver_PARDISO.h   ${Solvers_HDRS_ALL})
 
-	source_group(LinearLib FILES LinearSolver/LinearSolver_PARDISO.h)
-	source_group(LinearLib FILES LinearSolver/LinearSolver_PARDISO.cpp)
-endif(USE_PARDISO)
+if(POLYSOLVER_USE_MKL)
+source_group(LinearLib FILES LinearSolver/LinearSolver_PARDISO.h)
+source_group(LinearLib FILES LinearSolver/LinearSolver_PARDISO.cpp)
+endif(POLYSOLVER_USE_MKL)
 
-if(USE_cuSOLVER)
-	file(GLOB Solvers_SRCS_ALL LinearSolver/LinearSolver_cuSOLVER.cpp ${Solvers_SRCS_ALL})
-	file(GLOB Solvers_HDRS_ALL LinearSolver/LinearSolver_cuSOLVER.h   ${Solvers_HDRS_ALL})
+if(POLYSOLVER_USE_AMGX)
+source_group(LinearLib FILES LinearSolver/LinearSolver_AMGX.h)
+source_group(LinearLib FILES LinearSolver/LinearSolver_AMGX.cpp)
+endif(POLYSOLVER_USE_AMGX)
 
-	source_group(LinearLib FILES LinearSolver/LinearSolver_cuSOLVER.h)
-	source_group(LinearLib FILES LinearSolver/LinearSolver_cuSOLVER.cpp)
-endif(USE_cuSOLVER)
-
-if(USE_AMGX)
-	file(GLOB Solvers_SRCS_ALL LinearSolver/LinearSolver_AMGX.cpp ${Solvers_SRCS_ALL})
-	file(GLOB Solvers_HDRS_ALL LinearSolver/LinearSolver_AMGX.h   ${Solvers_HDRS_ALL})
-
-	source_group(LinearLib FILES LinearSolver/LinearSolver_AMGX.h)
-	source_group(LinearLib FILES LinearSolver/LinearSolver_AMGX.cpp)
-endif(USE_AMGX)
+if(POLYSOLVER_USE_AMGCL)
+source_group(LinearLib FILES LinearSolver/LinearSolver_AMGCL.h)
+source_group(LinearLib FILES LinearSolver/LinearSolver_AMGCL.cpp)
+endif(POLYSOLVER_USE_AMGCL)
 
 
-add_library(Solvers ${Solvers_SRCS_ALL} ${Solvers_HDRS_ALL})
+file(GLOB SRCS kernel.cpp ${SRCS})
+file(GLOB HDRS kernel.h   ${HDRS})
+file(GLOB SRCS LinearSolver/LinearSolver_IMPL.cpp ${SRCS})
+file(GLOB HDRS LinearSolver/LinearSolver_IMPL.h   ${HDRS})
 
-target_include_directories(Solvers PRIVATE ${MKL_INCLUDE_DIR})
-target_link_libraries(Solvers PRIVATE ${MKL_LIBRARIES})
+if(POLYSOLVER_USE_MKL)
+file(GLOB SRCS LinearSolver/LinearSolver_PARDISO.cpp ${SRCS})
+file(GLOB HDRS LinearSolver/LinearSolver_PARDISO.h   ${HDRS})
+endif(POLYSOLVER_USE_MKL)
 
-if(USE_cuSOLVER)
-	add_definitions(-DUSE_cuSOLVER)
-	target_include_directories(Solvers PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-	target_link_libraries(Solvers PRIVATE CUDA::cudart CUDA::cusolver CUDA::cusparse)
-elseif(USE_AMGX)
-	target_include_directories(Solvers PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-	target_link_libraries(Solvers PRIVATE CUDA::cudart)
-endif(USE_cuSOLVER)
+if(POLYSOLVER_USE_AMGX)
+file(GLOB SRCS LinearSolver/LinearSolver_AMGX.cpp ${SRCS})
+file(GLOB HDRS LinearSolver/LinearSolver_AMGX.h   ${HDRS})
+endif(POLYSOLVER_USE_AMGX)
 
-if(USE_AMGX)
-	add_definitions(-DUSE_AMGX)
-	target_include_directories(Solvers PRIVATE "$ENV{AMGX_DIR}/include")
-	target_link_libraries(Solvers PRIVATE "$ENV{AMGX_DIR}/lib/amgxsh.lib")
-	target_link_libraries(Solvers PRIVATE "$ENV{AMGX_DIR}/lib/amgxsh.lib")
-endif(USE_AMGX)
+if(POLYSOLVER_USE_AMGCL)
+file(GLOB SRCS LinearSolver/LinearSolver_AMGCL.cpp ${SRCS})
+file(GLOB HDRS LinearSolver/LinearSolver_AMGCL.h   ${HDRS})
+endif(POLYSOLVER_USE_AMGCL)
+
+	
+
+add_library(Solvers ${SRCS} ${HDRS})
+
+if(POLYSOLVER_USE_MKL)
+	target_include_directories(Solvers PUBLIC ${MKL_INCLUDE_DIR})
+	target_link_libraries(Solvers LINK_PUBLIC ${MKL_LIBRARIES})
+endif(POLYSOLVER_USE_MKL)
+
+if(POLYSOLVER_USE_CUDA)
+	target_include_directories(Solvers PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
+	target_link_libraries(Solvers LINK_PUBLIC CUDA::cudart CUDA::cusolver CUDA::cusparse)
+endif(POLYSOLVER_USE_CUDA)
+
+if(POLYSOLVER_USE_AMGX)
+	target_include_directories(Solvers PUBLIC ${AMGX_INCLUDE_PATH})
+	target_link_libraries(Solvers LINK_PUBLIC ${AMGX_LIBRARIES_amgx})
+	target_link_libraries(Solvers LINK_PUBLIC ${AMGX_LIBRARIES_amgxsh})
+endif(POLYSOLVER_USE_AMGX)
+
+if(POLYSOLVER_USE_AMGCL)
+	target_include_directories(Solvers PUBLIC "${CMAKE_SOURCE_DIR}/external")
+	target_include_directories(Solvers PUBLIC ${Boost_INCLUDE_DIRS})
+	target_link_libraries(Solvers LINK_PUBLIC ${Boost_LIBRARIES})
+endif(POLYSOLVER_USE_AMGCL)
+
+target_link_libraries(Solvers PRIVATE SparseMV)
+target_include_directories(Solvers PRIVATE SparseMV)
+set_target_properties(Solvers PROPERTIES FOLDER "PolySolver")

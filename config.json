@@ -1,0 +1,28 @@
+{
+  "LinearProblem": {
+    "solvers": [ "AMGX" ],
+    "case_path": "C:/WorkDirectory/Cases",
+    "cases_names": [
+      "3031_iter"
+    ],
+    "print_answer": false,
+    "check_answer": true,
+    "print_time": true,
+    "print_to_file": true,
+    "results_file_name": "results",
+    "n_rhs": 1,
+    "cuSOLVER_settings": {
+      "tolerance": 1e-6,
+      "factor": "CHOLSEKY",
+      "reorder": "RCM"
+    },
+    "AMGX_settings": {
+      "n_configs": 2,
+      "configs_path": "C:/LIBS64/AMGX/INSTALL - Copy/lib/configs",
+      "configs": [ "CG_DILU", "PCG_NOPREC" ],
+      "max_iter": 100000,
+      "tolerance": 1e-9
+    }
+  },
+  "EigenProblem": 0
+  }
