@@ -2,6 +2,6 @@
 PolySolver - платформа для изучения и сравнения эффективности решателей СЛАУ.  
 Requirements - CMake, Visual Studio 2022 (c++20 .ixx modules support), Boost
 
-Реализованы MKL PARDISO и AMGX, в процессе добавления AMGCL, в планах Ginkgo и MKL ISS
+Реализованы MKL PARDISO и AMGX, в процессе добавления AMGCL, в планах Ginkgo и MKL ISS.
 
-Большой проект, пишется в одиночку
+Проект обновляется по мере необходимости
