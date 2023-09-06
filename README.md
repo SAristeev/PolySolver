@@ -1,4 +1,7 @@
 # PolySolver
+
+не готов для стороннего использования.
+
 PolySolver - платформа для изучения и сравнения эффективности решателей СЛАУ.  
 Requirements - CMake, Visual Studio 2022 (c++20 .ixx modules support), Boost
 
