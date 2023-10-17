@@ -1,5 +1,5 @@
 #pragma once
-import Sparse;
+#include "../SparseMV/Sparse.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -56,7 +56,6 @@ namespace KERNEL {
 	};
 
 	template<class IT, class VT>
-	requires SPARSE::Matrix<IT, VT>
 	class ProblemCase
 	{
 	private:
@@ -75,7 +74,7 @@ namespace KERNEL {
 	};
 
 	template<class IT, class VT>
-	requires SPARSE::Matrix<IT, VT>
+
 	void ProblemCase<IT, VT>::setConfig(std::string ConfigName) {
 		std::ifstream file(ConfigName);
 		try {
@@ -187,7 +186,6 @@ namespace KERNEL {
 	}
 
 	template<class IT, class VT>
-	requires SPARSE::Matrix<IT, VT>
 	void ProblemCase<IT, VT>::start() {
 		double start, stop;
 

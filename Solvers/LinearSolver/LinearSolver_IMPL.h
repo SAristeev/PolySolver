@@ -1,5 +1,5 @@
 #pragma once
-import Sparse;
+#include "../../SparseMV/Sparse.h"
 #include<map>
 #include<iostream>
 #include"../json.hpp"
