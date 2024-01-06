@@ -1,4 +1,4 @@
-@echo ON
+@echo off
 setlocal
 
 :: set Intel environment: MKL
@@ -25,7 +25,7 @@ set AMGX_DIR=C:/LIBS64/AMGX
 %CMAKE% -Ax64 -B build ^
 	-DPOLYSOLVER_TEST=OFF ^
 	-DPOLYSOLVER_USE_CUDA=OFF ^
-	-DPOLYSOLVER_USE_AMGCL=ON ^
+	-DPOLYSOLVER_USE_AMGCL=OFF ^
 	-DPOLYSOLVER_USE_MKL=ON
 
 pause
