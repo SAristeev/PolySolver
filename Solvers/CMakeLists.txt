@@ -46,8 +46,8 @@ endif(POLYSOLVER_USE_AMGCL)
 add_library(Solvers ${SRCS} ${HDRS})
 
 if(POLYSOLVER_USE_MKL)
-	target_include_directories(Solvers PUBLIC ${MKL_INCLUDE_DIR})
-	target_link_libraries(Solvers LINK_PUBLIC ${MKL_LIBRARIES})
+	target_include_directories(Solvers PUBLIC MKL::MKL)
+	target_include_directories(Solvers PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
 endif(POLYSOLVER_USE_MKL)
 
 if(POLYSOLVER_USE_CUDA)
