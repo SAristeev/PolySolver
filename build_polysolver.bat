@@ -4,17 +4,17 @@ setlocal
 :: set Intel environment: MKL
 set INTEL_ENV="C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
 if exist %INTEL_ENV% (
-    call %INTEL_ENV%" intel64 vs2022
+    call %INTEL_ENV% intel64 vs2022
 ) else (
 	echo Error: Intel MKL not found
+	exit 1
 )
 
 :: check CMake existing
 set CMAKE="C:\Program Files\CMake\bin\cmake.exe"
-if exist %CMAKE% (
-    call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2022
-) else (
-	echo Error: CMake not found
+if not exist %CMAKE% (
+    echo Error: CMake not found
+	exit 2
 )
 
 :: set environment variables

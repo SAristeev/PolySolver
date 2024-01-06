@@ -44,7 +44,8 @@ endif(POLYSOLVER_TEST)
 add_subdirectory("SparseMV")
 add_subdirectory("Solvers")
 
-
+add_executable(main "PolySolver.cpp")
+	
 if(POLYSOLVER_TEST)
 	PrepareTests()
 	if(WIN32)
