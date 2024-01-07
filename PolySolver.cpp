@@ -1,22 +1,16 @@
-#include<iostream>
-#include<cstdlib>
-#include"Kernel/Kernel.h"
-#include"SparseAPI/SparseAPI.h"
+#include "PolySolver.hpp"
 
+void CreateSolvers(const json& settings, std::set<std::unique_ptr<LinearSolver>>& solvers) {
 
+	ObjectSolverFactory<LinearSolver, SolverID> LinearFactory;
+	InitLinearSolvers(LinearFactory);
 
-int main(int argc, char** argv)
-{
-    using namespace KERNEL;
-	try{
-		std::system("color A");
-		ProblemCase Case("C:/WorkDirectory/PolySolver/config.json");
-		Case.start();
-	}
-	catch (const std::exception& ex){
-		std::cerr << ex.what() << std::endl;
-	}
-    
-    
-    return 0;
+	for (auto& solver : settings["LinearProblem"]["solvers"]) {
+		if (polysolver::table.find(solver) != polysolver::table.end()) {
+			solvers.emplace(LinearFactory.get(polysolver::table.at(solver)));
+		}
+		else {
+			throw std::runtime_error("Can't find solver: " + solver);
+		}
+    }
 }
