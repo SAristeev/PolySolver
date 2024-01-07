@@ -1,15 +1,16 @@
 {
   "LinearProblem": {
-    "solvers": [ "AMGX" ],
-    "case_path": "C:/WorkDirectory/Cases",
-    "cases_names": [
-      "3031_iter"
+    "solvers": [ "PARDISO" ],
+    "path": "C:/WD/polysolver/sample",
+    "cases": [
+      "5x5"
     ],
+    "results_file_name": "results",
+	
     "print_answer": false,
     "check_answer": true,
     "print_time": true,
     "print_to_file": true,
-    "results_file_name": "results",
     "n_rhs": 1,
     "cuSOLVER_settings": {
       "tolerance": 1e-6,

@@ -1,4 +1,4 @@
-#include "SparseVector.h"
+#include "SparseVector.hpp"
 
 namespace SPARSE {
 	template<class VT>

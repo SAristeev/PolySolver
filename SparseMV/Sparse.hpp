@@ -1,18 +1,16 @@
-//module;
-export module Sparse;
-export import SparseMatrix;
-export import SparseVector;
+#pragma once
+#include "SparseMatrix.cpp"
+#include "SparseVector.cpp"
+#include <string>
 
-import <string>;
-
-export namespace SPARSE {
+namespace SPARSE {
 	enum class MATRIX_PART {
 		FULL = 0,
 		UPPER = 1,
 		LOWER = 2
 	};
+
 	template<class IT, class VT>
-		requires Matrix<IT, VT>
 	struct Case {
 		bool isSymmetric = false;
 		MATRIX_PART matrixPart = MATRIX_PART::FULL;
@@ -23,7 +21,6 @@ export namespace SPARSE {
 
 	};
 	template<class IT, class VT>
-		requires Matrix<IT, VT>
 	void Case<IT, VT>::fread(std::string path) {
 		A.freadCSR(path + "/A.txt");
 		isSymmetric = A.checkSymmetric();
@@ -32,7 +29,6 @@ export namespace SPARSE {
 	}
 
 	template<class IT, class VT>
-	requires Matrix<IT, VT>
 	SparseVector<VT> multiplication(const SparseMatrix<IT, VT> & A, const SparseVector<VT> & b) {
 		if (A.size() != b.size()) {
 			throw std::exception(std::string("SpMV: Matrix and vector have diff dim").c_str());
@@ -48,7 +44,6 @@ export namespace SPARSE {
 	}
 
 	template<class VT>
-	requires Vector<VT>
 	SparseVector<VT> subtraction(const SparseVector<VT>& lhs, const SparseVector<VT>& rhs) {
 		if (lhs.nrhs() != rhs.nrhs() || lhs.size() != rhs.size()) {
 			throw std::exception("Vectors have different dim or nrhs");

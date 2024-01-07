@@ -1,31 +1,9 @@
 cmake_minimum_required(VERSION 3.17.0 FATAL_ERROR)
 
-source_group(Headers FILES Sparse.h)
-source_group(Headers FILES SparseMatrix.h)
-source_group(Headers FILES SparseVector.h)
-
-source_group(Sources FILES SparseMatrix.cpp)
-source_group(Sources FILES SparseVector.cpp)
-
-file(GLOB SRCS SparseMatrix.cpp ${SRCS})
-file(GLOB SRCS SparseVector.cpp ${SRCS})
-
-file(GLOB HDRS Sparse.h ${HDRS})
-file(GLOB HDRS SparseMatrix.h ${HDRS})
-file(GLOB HDRS SparseVector.h ${HDRS})
-
-add_library(SparseMV ${SRCS} ${HDRS}) 
+add_library(SparseMV SparseMatrix.cpp
+					 SparseMatrix.hpp
+					 SparseVector.cpp
+					 SparseVector.hpp
+					 Sparse.hpp)
+			
 set_target_properties(SparseMV PROPERTIES FOLDER "SparseMV")
-
-if(POLYSOLVER_TEST)
-	
-	source_group(Testing FILES SparseTests.cpp)
-	file(GLOB SRCS SparseTests.cpp ${SRCS})
-
-	add_executable(Testing SparseTests.cpp)
-	target_include_directories(Testing PRIVATE ${Boost_INCLUDE_DIRS})
-	target_link_libraries(Testing LINK_PRIVATE ${Boost_LIBRARIES})
-	target_link_libraries(Testing LINK_PRIVATE SparseMV)
-
-	set_target_properties(Testing PROPERTIES FOLDER "SparseMV")
-endif(POLYSOLVER_TEST)

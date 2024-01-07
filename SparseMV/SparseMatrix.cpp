@@ -1,4 +1,4 @@
-#include "SparseMatrix.h"
+#include "SparseMatrix.hpp"
 
 namespace SPARSE {
 
