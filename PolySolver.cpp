@@ -49,3 +49,24 @@ void fread(std::string FileName, std::vector<double>& vals) {
 
 	file.close();
 }
+
+double resudial(const std::vector<double>& vals,
+const std::vector<MKL_INT>& cols,
+const std::vector<MKL_INT>& rows,
+const std::vector<double>& b,
+const std::vector<double>& x){
+	MKL_INT n = rows.size() - 1;
+	MKL_INT nnz = rows[n];
+	double alpha = 1.;
+
+	const char trans = 'n';
+	std::vector<double> r(b.size());
+	
+	mkl_cspblas_dcsrgemv(&trans, &n, vals.data(), rows.data(), cols.data(), x.data(), r.data());
+	
+	double res = 0;
+	for (int i = 0; i < b.size(); i++) {
+		res+= (r[i] - b[i]) * (r[i] - b[i]);
+	}
+	return sqrt(res);
+}

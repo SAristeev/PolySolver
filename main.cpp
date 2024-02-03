@@ -60,7 +60,11 @@ int main(int argc, char** argv)
         
         for (auto& solve_ptr : solvers) {
             solve_ptr->Solve(vals, cols, rows, b, x);
+            std::cout << "resudial(vals, cols, rows, b, x)" << std::endl;
+            std::cout << resudial(vals, cols, rows, b, x) << std::endl;
         }
+
+        
     }
     return 0;
 }
