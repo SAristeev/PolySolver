@@ -5,22 +5,26 @@
 #include "mkl.h"
 
 enum class SolverID {
-	sPARDISO = 10,
-	sAMGCL = 20
+	ePARDISO = 10,
+	eAMGCL = 20,
+	ePOLY_CG = 30
 };
 
 namespace polysolver {
 	std::unordered_map<std::string, SolverID> const table = {
-		{"PARDISO",SolverID::sPARDISO},
-		{"AMGCL", SolverID::sAMGCL}};
+		{"PARDISO",SolverID::ePARDISO},
+		{"AMGCL", SolverID::eAMGCL},
+		{"POLY_CG", SolverID::ePOLY_CG} };
 }
 
 // Base solver class 
 class LinearSolver {
 public:
-	virtual int Solve(const SPARSE::SparseMatrix<MKL_INT, double>& A,
-		const SPARSE::SparseVector<double>& b,
-		SPARSE::SparseVector<double>& x
+	virtual int Solve(const std::vector<double>& vals,
+		const std::vector<MKL_INT>& cols,
+		const std::vector<MKL_INT>& rows,
+		const std::vector<double>& b,
+		std::vector<double>& x
 	) {
 		return -1;
 	}

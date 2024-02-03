@@ -8,8 +8,10 @@ class LinearSolverPARDISO : public LinearSolver {
 	void* _pt[64];
 public:
 	void initParams();
-	int Solve(const SPARSE::SparseMatrix<MKL_INT, double>& A,
-		const SPARSE::SparseVector<double>& b,
-		SPARSE::SparseVector<double>& x
+	int Solve(const std::vector<double>& vals,
+		const std::vector<MKL_INT>& cols,
+		const std::vector<MKL_INT>& rows,
+		const std::vector<double>& b,
+		std::vector<double>& x
 	);
 };

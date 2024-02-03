@@ -83,20 +83,22 @@ void LinearSolverPARDISO::initParams() {
     }
 
 }
-int LinearSolverPARDISO::Solve(const SPARSE::SparseMatrix<MKL_INT, double>& A,
-                               const SPARSE::SparseVector<double>& b,
-                               SPARSE::SparseVector<double>& x
+int LinearSolverPARDISO::Solve(const std::vector<double>& vals,
+    const std::vector<MKL_INT>& cols,
+    const std::vector<MKL_INT>& rows,
+    const std::vector<double>& b,
+    std::vector<double>& x
 ) {
     initParams();
-    MKL_INT n = A.size();
-    MKL_INT nnz = A.nnz();
+    MKL_INT n = rows.size() - 1;
+    MKL_INT nnz = rows[n];
 
-    const MKL_INT* h_RowsA = A.getRows();
-    const MKL_INT* h_ColsA = A.getCols();
-    const double* h_ValsA = A.getVals();
+    const MKL_INT* h_RowsA = rows.data();
+    const MKL_INT* h_ColsA = cols.data();
+    const double* h_ValsA = vals.data();
 
-    const double* h_b = b.getVals();
-    double* h_x = x.getVals();
+    const double* h_b = b.data();
+    double* h_x = x.data();
     MKL_INT nrhs = 1;//b.nrhs();
     double ddum = 0.0;
     MKL_INT maxfct = 1;

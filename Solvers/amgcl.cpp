@@ -1,13 +1,16 @@
 #include "amgcl.hpp"
 
-int LinearSolverAMGCL::Solve(const SPARSE::SparseMatrix<MKL_INT, double>& A,
-                               const SPARSE::SparseVector<double>& b,
-                               SPARSE::SparseVector<double>& x
+int LinearSolverAMGCL::Solve(const std::vector<double>& vals,
+    const std::vector<MKL_INT>& cols,
+    const std::vector<MKL_INT>& rows,
+    const std::vector<double>& b,
+    std::vector<double>& x
 ) {
     // The profiler:
     amgcl::profiler<> prof("poisson3Db");
     //ptrdiff_t Av;
-    auto A_ref = std::tie(A.getn(), A.getValsRows(), A.getValsCols(), A.getValsVals());
+    int n = rows.size() - 1;
+    auto A = std::tie(n, rows, cols, vals);
     typedef amgcl::backend::builtin<double> SBackend;
     typedef amgcl::backend::builtin<double> PBackend;
 
@@ -27,7 +30,7 @@ int LinearSolverAMGCL::Solve(const SPARSE::SparseMatrix<MKL_INT, double>& A,
     prm.solver.verbose = true;
     // Initialize the solver with the system matrix:
     prof.tic("setup");
-    Solver solve(A_ref, prm);
+    Solver solve(A, prm);
     prof.toc("setup");
 
     // Show the mini-report on the constructed solver:
@@ -39,7 +42,7 @@ int LinearSolverAMGCL::Solve(const SPARSE::SparseMatrix<MKL_INT, double>& A,
     double error;
     
     prof.tic("solve");
-    std::tie(iters, error) = solve(A_ref, b.getVector(), x.getVector());
+    std::tie(iters, error) = solve(A, b, x);
     prof.toc("solve");
 
     // Output the number of iterations, the relative error,

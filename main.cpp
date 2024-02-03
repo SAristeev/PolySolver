@@ -1,5 +1,6 @@
 #include "PolySolver.hpp"
 
+
 int main(int argc, char** argv)
 {
     std::unordered_map<std::string, std::string> parsed_params;//in the pair {key,param} param may be empty
@@ -42,19 +43,23 @@ int main(int argc, char** argv)
     CreateSolvers(settings, solvers);
 
     for (std::string case_name : settings["LinearProblem"]["cases"]) {
+        
+        std::vector<double> b;
+        std::vector<double> x;
+
+        std::vector<double> vals;
+        std::vector<MKL_INT> rows;
+        std::vector<MKL_INT> cols;
+        
         std::string path = settings["LinearProblem"]["path"];
         std::string full_path = path + '/' + case_name;
 
-        SPARSE::SparseMatrix<MKL_INT, double> A;
-        SPARSE::SparseVector<double> b;
-        SPARSE::SparseVector<double> x;
-        
-        A.freadCSR(full_path + "/A.txt");
-        b.fread(full_path + "/B.vec");
-        x = b;
+        freadCSR(full_path + "/A.txt", vals, cols, rows);
+        fread(full_path + "/B.vec", b);
+        x.resize(b.size());
         
         for (auto& solve_ptr : solvers) {
-            solve_ptr->Solve(A,b,x);
+            solve_ptr->Solve(vals, cols, rows, b, x);
         }
     }
     return 0;

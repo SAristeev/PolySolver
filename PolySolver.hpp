@@ -11,3 +11,6 @@
 using namespace nlohmann;
 
 void CreateSolvers(const json& settings, std::set<std::unique_ptr<LinearSolver>>& solvers);
+
+void freadCSR(std::string FileName, std::vector<double>& vals, std::vector<MKL_INT>& cols, std::vector<MKL_INT>& rows);
+void fread(std::string FileName, std::vector<double>& vals);
