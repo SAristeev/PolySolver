@@ -16,8 +16,8 @@ add_executable(main "main.cpp"
 					"Solvers/pardiso.hpp"
 					"Solvers/amgcl.cpp"
 					"Solvers/amgcl.hpp"
-					"Solvers/poly_cg.cpp"
-					"Solvers/poly_cg.hpp")
+					"Solvers/my_cg.cpp"
+					"Solvers/my_cg.hpp")
 
 target_include_directories(main PUBLIC "external")
 add_compile_definitions("AMGCL_NO_BOOST")
