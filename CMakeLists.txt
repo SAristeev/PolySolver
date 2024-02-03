@@ -7,8 +7,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 find_package(MKL CONFIG REQUIRED PATHS $ENV{MKLROOT})	
 
-add_subdirectory("SparseMV")
-
 add_executable(main "main.cpp"
 					"PolySolver.cpp" 
 					"PolySolver.hpp"
@@ -17,13 +15,13 @@ add_executable(main "main.cpp"
 					"Solvers/pardiso.cpp"
 					"Solvers/pardiso.hpp"
 					"Solvers/amgcl.cpp"
-					"Solvers/amgcl.hpp")
+					"Solvers/amgcl.hpp"
+					"Solvers/poly_cg.cpp"
+					"Solvers/poly_cg.hpp")
 
 target_include_directories(main PUBLIC "external")
 add_compile_definitions("AMGCL_NO_BOOST")
 
-
-target_link_libraries(main LINK_PRIVATE SparseMV)
 target_include_directories(main PUBLIC
 $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
 target_link_libraries(main PUBLIC $<LINK_ONLY:MKL::MKL>)
