@@ -2,6 +2,6 @@
 #include "pardiso.hpp"
 #include "amgcl.hpp"
 void InitLinearSolvers(ObjectSolverFactory<LinearSolver, SolverID>& LinearFactory) {
-	LinearFactory.add<LinearSolverPARDISO>(SolverID::ePARDISO);
-	LinearFactory.add<LinearSolverAMGCL>(SolverID::eAMGCL);
+	LinearFactory.add<LinearSolver_PARDISO>(SolverID::ePARDISO);
+	LinearFactory.add<LinearSolver_AMGCL>(SolverID::eAMGCL);
 }

@@ -3,7 +3,7 @@
 
 
 
-class LinearSolverPARDISO : public LinearSolver {
+class LinearSolver_PARDISO : public LinearSolver {
 	MKL_INT _iparm[64];
 	void* _pt[64];
 public:

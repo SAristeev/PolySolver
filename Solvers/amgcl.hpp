@@ -19,7 +19,7 @@
 #include <amgcl/profiler.hpp>
 
 
-class LinearSolverAMGCL : public LinearSolver {
+class LinearSolver_AMGCL : public LinearSolver {
 public:
 	int Solve(const std::vector<double>& vals,
 		const std::vector<MKL_INT>& cols,

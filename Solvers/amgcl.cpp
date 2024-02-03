@@ -1,6 +1,6 @@
 #include "amgcl.hpp"
 
-int LinearSolverAMGCL::Solve(const std::vector<double>& vals,
+int LinearSolver_AMGCL::Solve(const std::vector<double>& vals,
     const std::vector<MKL_INT>& cols,
     const std::vector<MKL_INT>& rows,
     const std::vector<double>& b,

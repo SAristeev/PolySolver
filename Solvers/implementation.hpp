@@ -1,7 +1,8 @@
 #pragma once
-#include "../SparseMV/Sparse.hpp"
 #include <map>
 #include <unordered_map>
+#include <memory>
+#include <string>
 #include "mkl.h"
 
 enum class SolverID {

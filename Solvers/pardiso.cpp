@@ -33,7 +33,7 @@ const char* ErrorByCodePARDISO(MKL_INT Code) {
     return RetVal;
 }
 
-void LinearSolverPARDISO::initParams() {
+void LinearSolver_PARDISO::initParams() {
     // Setup Pardiso control parameters
     for (int i = 0; i < 64; i++) {
         _iparm[i] = 0;
@@ -83,7 +83,7 @@ void LinearSolverPARDISO::initParams() {
     }
 
 }
-int LinearSolverPARDISO::Solve(const std::vector<double>& vals,
+int LinearSolver_PARDISO::Solve(const std::vector<double>& vals,
     const std::vector<MKL_INT>& cols,
     const std::vector<MKL_INT>& rows,
     const std::vector<double>& b,
