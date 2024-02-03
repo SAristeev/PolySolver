@@ -15,69 +15,74 @@ int LinearSolver_my_cg::Solve(const std::vector<double>& vals,
 
 
 	// r,z
-	std::vector<double> r(b.size());
-	std::vector<double> z(b.size());
+	std::vector<double> r(n);
+	std::vector<double> q(n);
+	std::vector<double> p(n);
 	const char trans = 'n';
 	mkl_cspblas_dcsrgemv(&trans, &n, vals.data(), rows.data(), cols.data(), x.data(), r.data());
-	// z0 = r0
-	std::copy(r.begin(), r.end(), z.begin());
-
-	// Az 
-	std::vector<double> Az(b.size());
+	
 
 	// check ||B||
 	double b_norm = 0;
 	for (int i = 0; i < n; i++) {
-		r[i] = -b[i];
+		r[i] = b[i] - r[i];
 		b_norm += b[i] * b[i];
 	}
 	b_norm = sqrt(b_norm);
 
 	// settings
-	double tolerance = 1e-2;
-	int max_iter = 100;
+	double tolerance = 1e-9;
+	int max_iter = 10000;
 
 	// internal
 	bool is_convergenced = false;
-	double aplha;
+	double aplha, rho = 0., rho_prev;
 	int iter = 0;
+	double cur_res = 0;
 	do {
-		// 1. find alpha
-		// compute inner prod
-		double rho = 0;
+		rho_prev = rho;
+
+		// \rho = r^T * r
+		rho = 0;
 		for (int i = 0; i < n; i++) {
 			rho += r[i] * r[i];
 		}
-
-		// Az
-		mkl_cspblas_dcsrgemv(&trans, &n, vals.data(), rows.data(), cols.data(), z.data(), Az.data());
-		// (Az, z) dot product
-		double az = 0;
-		for (int i = 0; i < n; i++) {
-			az += Az[i] * z[i];
+		if (iter == 0) {
+			// q0 = r0
+			std::copy(r.begin(), r.end(), p.begin());
+		}
+		else {
+			// beta = rho / rho_prev
+			double beta = rho / rho_prev;
+			for (int i = 0; i < n; i++) {
+				// p = r + beta * p 
+				p[i] = r[i] + beta * p[i];
+			}
 		}
 
-		// alpha
-		aplha = rho / az;
-
-		double rr = 0;
+		// q = A * p
+		mkl_cspblas_dcsrgemv(&trans, &n, vals.data(), rows.data(), cols.data(), p.data(), q.data());
+		
+		//  dot product
+		double pq = 0;
 		for (int i = 0; i < n; i++) {
-			// 2. correct x
-			x[i] += aplha * z[i];
-			// 3. correct r
-			r[i] -= aplha * z[i];
-			// 4. compute rr
-			rr += r[i];
+			pq += p[i] * q[i];
 		}
-		// beta
-		double beta = rr / rho;
+
+		// alpha = rho / (p^T * q)
+		aplha = rho / pq;
+		
+		for (int i = 0; i < n; i++) {
+			// x = x + alpha * q
+			x[i] += aplha * p[i];
+			// r = r - alpha * q
+			r[i] -= aplha * q[i];
+		}
+		
 		double cur_res = 0;
-		// z(k) = r(k) + beta * z(k-1)
 		for (int i = 0; i < n; i++) {
-			z[i] = r[i] + beta * z[i];
 			cur_res += r[i] * r[i];
 		}
-
 		cur_res = sqrt(cur_res);
 		double cur_rel = cur_res / b_norm;
 		std::cout << cur_rel << std::endl;
