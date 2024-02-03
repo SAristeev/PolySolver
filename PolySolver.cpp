@@ -65,8 +65,12 @@ const std::vector<double>& x){
 	mkl_cspblas_dcsrgemv(&trans, &n, vals.data(), rows.data(), cols.data(), x.data(), r.data());
 	
 	double res = 0;
-	for (int i = 0; i < b.size(); i++) {
+	for (int i = 0; i < n; i++) {
 		res+= (r[i] - b[i]) * (r[i] - b[i]);
 	}
-	return sqrt(res);
+	double res_b = 0;
+	for (int i = 0; i < n; i++) {
+		res_b += b[i] * b[i];
+	}
+	return sqrt(res) / sqrt(res_b);
 }
