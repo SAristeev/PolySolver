@@ -107,7 +107,9 @@ struct mkl {
     /// Backend parameters.
     struct params {
         params() {}
+#ifndef AMGCL_NO_BOOST
         params(const boost::property_tree::ptree&) {}
+#endif AMGCL_NO_BOOST
     };
 
     /// Copy matrix from builtin backend.

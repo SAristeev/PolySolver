@@ -16,6 +16,7 @@ namespace SPARSE {
 		size_t nz = 0;
 	public:
 		size_t size() const { return n; }
+		const size_t& getn() const { return n; }
 		size_t nnz() const { return nz; }
 		//void getVals(VT** rhs) { *rhs = this->Vals.data(); }
 		//void getRows(IT** rhs) { *rhs = this->RowsCSR.data(); }
@@ -23,9 +24,9 @@ namespace SPARSE {
 		VT const* const getVals() const { return Vals.data(); }
 		IT const* const getRows() const { return RowsCSR.data(); }
 		IT const* const getCols() const { return Cols.data(); }
-		std::vector<VT>& getValsVals() const { return Vals; }
-		std::vector<IT>& getValsRows() const { return RowsCSR; }
-		std::vector<IT>& getValsCols() const { return Cols; }
+		const std::vector<VT>& getValsVals() const { return Vals; }
+		const std::vector<IT>& getValsRows() const { return RowsCSR; }
+		const std::vector<IT>& getValsCols() const { return Cols; }
 		void freadCSR(std::string FileName);
 		void fprintCSR(std::string FileName) const;
 

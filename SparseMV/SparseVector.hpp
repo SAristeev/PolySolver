@@ -22,7 +22,8 @@ namespace SPARSE {
 		VT* const getVals() const { return const_cast<VT*>(Vals.at(0).data()); }
 		VT* const getVals(size_t i) const { return const_cast<VT*>(Vals.at(i).data()); }
 
-		std::vector<VT> getVector() const { return Vals.at(0); }
+		std::vector<VT>& getVector() { return Vals.at(0); }
+		const std::vector<VT>& getVector() const { return Vals.at(0); }
 		std::vector<VT> getVector(size_t i) const { return Vals.at(i); }
 		//void addZeros();
 

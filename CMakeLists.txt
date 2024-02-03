@@ -15,7 +15,13 @@ add_executable(main "main.cpp"
 					"Solvers/implementation.cpp"
 					"Solvers/implementation.hpp"
 					"Solvers/pardiso.cpp"
-					"Solvers/pardiso.hpp")
+					"Solvers/pardiso.hpp"
+					"Solvers/amgcl.cpp"
+					"Solvers/amgcl.hpp")
+
+target_include_directories(main PUBLIC "external")
+add_compile_definitions("AMGCL_NO_BOOST")
+
 
 target_link_libraries(main LINK_PRIVATE SparseMV)
 target_include_directories(main PUBLIC
