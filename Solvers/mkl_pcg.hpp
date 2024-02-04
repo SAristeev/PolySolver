@@ -1,7 +1,7 @@
 #pragma once
 #include "implementation.hpp"
 
-class LinearSolver_cuda_cg : public LinearSolver {
+class LinearSolver_mkl_pcg : public LinearSolver {
 public:
 	int Solve(const std::vector<double>& vals,
 		const std::vector<MKL_INT>& cols,

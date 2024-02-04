@@ -1,5 +1,8 @@
 #pragma once
 #include <map>
+#include <iostream>
+#include <format>
+#include <algorithm>
 #include <unordered_map>
 #include <iomanip>
 #include <memory>
@@ -9,18 +12,20 @@
 enum class SolverID {
 	ePARDISO = 10,
 	eAMGCL = 20,
-	eMY_CG = 30,
-	eMY_PCG = 35,
-	eCUDA_CG_CI0 = 40,
+	eMKL_CG = 30,
+	eMKL_PCG = 35,
+	eCUDA_CG = 40,
+	eCUDA_PCG = 45,
 };
 
 namespace polysolver {
 	std::unordered_map<std::string, SolverID> const table = {
 		{"PARDISO",SolverID::ePARDISO},
 		{"AMGCL", SolverID::eAMGCL},
-		{"MY_CG", SolverID::eMY_CG},
-		{"MY_PCG", SolverID::eMY_PCG},
-		{"CUDA_CG_IC0", SolverID::eCUDA_CG_CI0} };
+		{"MKL_CG", SolverID::eMKL_CG},
+		{"MKL_PCG", SolverID::eMKL_PCG},
+		{"CUDA_CG", SolverID::eCUDA_CG},
+		{"CUDA_PCG", SolverID::eCUDA_PCG} };
 }
 
 // Base solver class 
