@@ -2,7 +2,6 @@
 #include "implementation.hpp"
 
 #include <amgcl/backend/builtin.hpp>
-#include <amgcl/backend/mkl.hpp>
 #include <amgcl/adapter/crs_tuple.hpp>
 #include <amgcl/make_solver.hpp>
 #include <amgcl/amg.hpp>
