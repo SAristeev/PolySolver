@@ -26,7 +26,9 @@ add_executable(main "main.cpp"
 					"Solvers/my_pcg.cpp"
 					"Solvers/my_pcg.hpp"
 					"Solvers/cuda_cg_ic0.cpp"
-					"Solvers/cuda_cg_ic0.hpp")
+					"Solvers/cuda_cg_ic0.hpp"
+					"Solvers/cuda_cg.cpp"
+					"Solvers/cuda_cg.hpp")
 					
 target_include_directories(main PUBLIC "external")
 add_compile_definitions("AMGCL_NO_BOOST")
