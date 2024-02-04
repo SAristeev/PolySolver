@@ -10,7 +10,7 @@ int LinearSolver_cuda_cg::Solve(const std::vector<double>& vals,
 
 	// settings
 	double tolerance = 1e-9;
-	int max_iter = 1000;
+	int max_iter = 50000;
 	bool print_verbose = true;
 	if (print_verbose) 
 	{

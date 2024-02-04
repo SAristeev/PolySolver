@@ -10,7 +10,7 @@ int LinearSolver_cuda_pcg::Solve(const std::vector<double>& vals,
 
 	// settings
 	double tolerance = 1e-9;
-	int max_iter = 1000;
+	int max_iter = 10000;
 	bool print_verbose = true;
 	if (print_verbose)
 	{
@@ -97,31 +97,31 @@ int LinearSolver_cuda_pcg::Solve(const std::vector<double>& vals,
 	// - matrix L is base-0
 	// - matrix L is lower triangular
 	// - matrix L has non-unit diagonal
-	cusparseCreateMatDescr(&descr_A);
-	cusparseSetMatIndexBase(descr_A, CUSPARSE_INDEX_BASE_ZERO);
-	cusparseSetMatType(descr_A, CUSPARSE_MATRIX_TYPE_GENERAL);
+	gpuErrchk(cusparseCreateMatDescr(&descr_A));
+	gpuErrchk(cusparseSetMatIndexBase(descr_A, CUSPARSE_INDEX_BASE_ZERO));
+	gpuErrchk(cusparseSetMatType(descr_A, CUSPARSE_MATRIX_TYPE_GENERAL));
 
-	cusparseCreateMatDescr(&descr_L);
-	cusparseSetMatIndexBase(descr_L, CUSPARSE_INDEX_BASE_ZERO);
-	cusparseSetMatType(descr_L, CUSPARSE_MATRIX_TYPE_GENERAL);
-	cusparseSetMatFillMode(descr_L, CUSPARSE_FILL_MODE_LOWER);
-	cusparseSetMatDiagType(descr_L, CUSPARSE_DIAG_TYPE_NON_UNIT);
+	gpuErrchk(cusparseCreateMatDescr(&descr_L));
+	gpuErrchk(cusparseSetMatIndexBase(descr_L, CUSPARSE_INDEX_BASE_ZERO));
+	gpuErrchk(cusparseSetMatType(descr_L, CUSPARSE_MATRIX_TYPE_GENERAL));
+	gpuErrchk(cusparseSetMatFillMode(descr_L, CUSPARSE_FILL_MODE_LOWER));
+	gpuErrchk(cusparseSetMatDiagType(descr_L, CUSPARSE_DIAG_TYPE_NON_UNIT));
 
 	// step 2: create a empty info structure
 	// we need one info for bsric02 and two info's for bsrsv2
-	cusparseCreateBsric02Info(&info_A);
-	cusparseCreateBsrsv2Info(&info_L);
-	cusparseCreateBsrsv2Info(&info_Lt);
+	gpuErrchk(cusparseCreateBsric02Info(&info_A));
+	gpuErrchk(cusparseCreateBsrsv2Info(&info_L));
+	gpuErrchk(cusparseCreateBsrsv2Info(&info_Lt));
 
 	// step 3: query how much memory used in bsric02 and bsrsv2, and allocate the buffer
-	cusparseDbsric02_bufferSize(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, n, nnz, descr_A, d_vals, d_rows, d_cols, 1, info_A, &pbufferSize_A);
-	cusparseDbsrsv2_bufferSize(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_L, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_L, &pBufferSize_L);
-	cusparseDbsrsv2_bufferSize(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_Lt, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_Lt, &pBufferSize_Lt);
+	gpuErrchk(cusparseDbsric02_bufferSize(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, n, nnz, descr_A, d_vals, d_rows, d_cols, 1, info_A, &pbufferSize_A));
+	gpuErrchk(cusparseDbsrsv2_bufferSize(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_L, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_L, &pBufferSize_L));
+	gpuErrchk(cusparseDbsrsv2_bufferSize(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_Lt, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_Lt, &pBufferSize_Lt));
 
 	pBufferSize = std::max(pbufferSize_A, std::max(pBufferSize_L, pBufferSize_Lt));
 
 	// pBuffer returned by cudaMalloc is automatically aligned to 128 bytes.
-	cudaMalloc((void**)&pBuffer, pBufferSize);
+	gpuErrchk(cudaMalloc((void**)&pBuffer, pBufferSize));
 
 	// step 4: perform analysis of incomplete Cholesky on M
 	//         perform analysis of triangular solve on L
@@ -129,17 +129,17 @@ int LinearSolver_cuda_pcg::Solve(const std::vector<double>& vals,
 	// The lower triangular part of M has the same sparsity pattern as L, so
 	// we can do analysis of bsric02 and bsrsv2 simultaneously.
 
-	cusparseDbsric02_analysis(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, n, nnz, descr_A, d_vals, d_rows, d_cols, 1, info_A, policy_A, pBuffer);
+	gpuErrchk(cusparseDbsric02_analysis(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, n, nnz, descr_A, d_vals, d_rows, d_cols, 1, info_A, policy_A, pBuffer));
 	cusparseStatus_t status = cusparseXbsric02_zeroPivot(cusparse_handle, info_A, &structural_zero);
 	if (CUSPARSE_STATUS_ZERO_PIVOT == status) {
 		printf("A(%d,%d) is missing\n", structural_zero, structural_zero);
 	}
 
-	cusparseDbsrsv2_analysis(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_L, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_L, policy_L, pBuffer);
-	cusparseDbsrsv2_analysis(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_Lt, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_Lt, policy_Lt, pBuffer);
+	gpuErrchk(cusparseDbsrsv2_analysis(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_L, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_L, policy_L, pBuffer));
+	gpuErrchk(cusparseDbsrsv2_analysis(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_Lt, n, nnz, descr_L, d_vals, d_rows, d_cols, 1, info_Lt, policy_Lt, pBuffer));
 
 	// step 5: M = L * L'
-	cusparseDbsric02(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, n, nnz, descr_A, d_valsL, d_rows, d_cols, 1, info_A, policy_A, pBuffer);
+	gpuErrchk(cusparseDbsric02(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, n, nnz, descr_A, d_valsL, d_rows, d_cols, 1, info_A, policy_A, pBuffer));
 	status = cusparseXbsric02_zeroPivot(cusparse_handle, info_A, &numerical_zero);
 	if (CUSPARSE_STATUS_ZERO_PIVOT == status) {
 		printf("L(%d,%d) is not positive definite\n", numerical_zero, numerical_zero);
@@ -178,8 +178,8 @@ int LinearSolver_cuda_pcg::Solve(const std::vector<double>& vals,
 		// M z = r
 		if (1)
 		{
-			cusparseDbsrsv2_solve(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_L, n, nnz, &alpha, descr_L, d_valsL, d_rows, d_cols, 1, info_L, d_r, d_t, policy_L, pBuffer);
-			cusparseDbsrsv2_solve(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_Lt, n, nnz, &alpha, descr_L, d_valsL, d_rows, d_cols, 1, info_Lt, d_t, d_z, policy_Lt, pBuffer);
+			gpuErrchk(cusparseDbsrsv2_solve(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_L, n, nnz, &alpha, descr_L, d_valsL, d_rows, d_cols, 1, info_L, d_r, d_t, policy_L, pBuffer));
+			gpuErrchk(cusparseDbsrsv2_solve(cusparse_handle, CUSPARSE_DIRECTION_COLUMN, trans_Lt, n, nnz, &alpha, descr_L, d_valsL, d_rows, d_cols, 1, info_Lt, d_t, d_z, policy_Lt, pBuffer));
 
 		}
 		else
