@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <unordered_map>
+#include <iomanip>
 #include <memory>
 #include <string>
 #include "mkl.h"
@@ -10,6 +11,7 @@ enum class SolverID {
 	eAMGCL = 20,
 	eMY_CG = 30,
 	eMY_PCG = 35,
+	eCUDA_CG_CI0 = 40,
 };
 
 namespace polysolver {
@@ -17,7 +19,8 @@ namespace polysolver {
 		{"PARDISO",SolverID::ePARDISO},
 		{"AMGCL", SolverID::eAMGCL},
 		{"MY_CG", SolverID::eMY_CG},
-		{"MY_PCG", SolverID::eMY_PCG} };
+		{"MY_PCG", SolverID::eMY_PCG},
+		{"CUDA_CG_IC0", SolverID::eCUDA_CG_CI0} };
 }
 
 // Base solver class 

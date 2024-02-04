@@ -28,7 +28,7 @@ int LinearSolver_my_pcg::Solve(const std::vector<double>& vals,
 	double b_norm = 0;
 	for (int i = 0; i < n; i++) {
 		r[i] = b[i] - r[i];
-		b_norm += b[i] * b[i];
+		b_norm += (r[i]) * (r[i]);
 	}
 	b_norm = sqrt(b_norm);
 
@@ -38,7 +38,7 @@ int LinearSolver_my_pcg::Solve(const std::vector<double>& vals,
 
 	// internal
 	bool is_convergenced = false;
-	double aplha, rho = 0., rho_prev;
+	double aplha, beta, rho = 0., rho_prev;
 	int iter = 0;
 	double cur_res = 0; double cur_rel = 0;
 	do {
@@ -67,10 +67,12 @@ int LinearSolver_my_pcg::Solve(const std::vector<double>& vals,
 		}
 		else {
 			// beta = rho / rho_prev
-			double beta = rho / rho_prev;
+			beta = rho / rho_prev;
 			for (int i = 0; i < n; i++) {
 				// p = z + beta * p 
-				p[i] = z[i] + beta * p[i];
+				//p[i] = z[i] + beta * p[i];
+				z[i] += beta * p[i];
+				p[i] = z[i];
 			}
 		}
 
@@ -92,6 +94,7 @@ int LinearSolver_my_pcg::Solve(const std::vector<double>& vals,
 			// r = r - alpha * q
 			r[i] -= aplha * q[i];
 		}
+		//for (auto num : x) { std::cout << std::setprecision(20) << num << std::endl; } std::cout << std::endl;
 
 		double cur_res = 0;
 		for (int i = 0; i < n; i++) {

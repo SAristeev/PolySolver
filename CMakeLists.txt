@@ -4,6 +4,11 @@ set(CMAKE_CXX_STANDARD 20)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMake")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+option(POLYSOLVER_USE_CUDA OFF)
+
+if(POLYSOLVER_USE_CUDA)
+	find_package(CUDAToolkit REQUIRED)
+endif(POLYSOLVER_USE_CUDA)
 
 find_package(MKL CONFIG REQUIRED PATHS $ENV{MKLROOT})	
 
@@ -19,11 +24,19 @@ add_executable(main "main.cpp"
 					"Solvers/my_cg.cpp"
 					"Solvers/my_cg.hpp"
 					"Solvers/my_pcg.cpp"
-					"Solvers/my_pcg.hpp")
-
+					"Solvers/my_pcg.hpp"
+					"Solvers/cuda_cg_ic0.cpp"
+					"Solvers/cuda_cg_ic0.hpp")
+					
 target_include_directories(main PUBLIC "external")
 add_compile_definitions("AMGCL_NO_BOOST")
 
 target_include_directories(main PUBLIC
 $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
 target_link_libraries(main PUBLIC $<LINK_ONLY:MKL::MKL>)
+
+if(POLYSOLVER_USE_CUDA)
+	add_compile_definitions("POLYSOLVER_USE_CUDA")
+	target_include_directories(main PUBLIC ${CUDAToolkit_INCLUDE_DIRS}) 
+	target_link_libraries(main PRIVATE CUDA::cudart CUDA::cublas CUDA::cusolver CUDA::cusparse)
+endif(POLYSOLVER_USE_CUDA)
