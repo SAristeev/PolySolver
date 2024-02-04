@@ -17,7 +17,9 @@ add_executable(main "main.cpp"
 					"Solvers/amgcl.cpp"
 					"Solvers/amgcl.hpp"
 					"Solvers/my_cg.cpp"
-					"Solvers/my_cg.hpp")
+					"Solvers/my_cg.hpp"
+					"Solvers/my_pcg.cpp"
+					"Solvers/my_pcg.hpp")
 
 target_include_directories(main PUBLIC "external")
 add_compile_definitions("AMGCL_NO_BOOST")

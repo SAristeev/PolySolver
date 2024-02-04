@@ -1,12 +1,12 @@
-#include "my_cg.hpp"
+#include "my_pcg.hpp"
 
-int LinearSolver_my_cg::Solve(const std::vector<double>& vals,
+int LinearSolver_my_pcg::Solve(const std::vector<double>& vals,
     const std::vector<MKL_INT>& cols,
     const std::vector<MKL_INT>& rows,
     const std::vector<double>& b,
     std::vector<double>& x
     ) {
-	std::cout << "My CG - IC0: start" << std::endl;
+	std::cout << "My PCG - IC0: start" << std::endl;
 	MKL_INT n = rows.size() - 1;
 	MKL_INT nnz = rows[n];
 
@@ -18,9 +18,11 @@ int LinearSolver_my_cg::Solve(const std::vector<double>& vals,
 	std::vector<double> r(n);
 	std::vector<double> q(n);
 	std::vector<double> p(n);
+	std::vector<double> z(n);
+	std::vector<double> t(n);
 	const char trans = 'n';
 	mkl_cspblas_dcsrgemv(&trans, &n, vals.data(), rows.data(), cols.data(), x.data(), r.data());
-	
+
 
 	// check ||B||
 	double b_norm = 0;
@@ -40,29 +42,41 @@ int LinearSolver_my_cg::Solve(const std::vector<double>& vals,
 	int iter = 0;
 	double cur_res = 0; double cur_rel = 0;
 	do {
+		// precond
+		if (0) {
+			const char upper = 'u';
+			const char lower = 'l';
+			const char trans = 'n';
+			const char diag = 'n';
+			mkl_cspblas_dcsrtrsv(&lower, &trans, &diag, &n, vals.data(), rows.data(), cols.data(), r.data(), t.data());
+			mkl_cspblas_dcsrtrsv(&lower, &trans, &diag, &n, vals.data(), rows.data(), cols.data(), t.data(), z.data());
+		}
+		else {
+			std::copy(r.begin(), r.end(), z.begin());
+		}
 		rho_prev = rho;
 
-		// \rho = r^T * r
+		// \rho = r^T * z
 		rho = 0;
 		for (int i = 0; i < n; i++) {
-			rho += r[i] * r[i];
+			rho += r[i] * z[i];
 		}
 		if (iter == 0) {
 			// q0 = r0
-			std::copy(r.begin(), r.end(), p.begin());
+			std::copy(z.begin(), z.end(), p.begin());
 		}
 		else {
 			// beta = rho / rho_prev
 			double beta = rho / rho_prev;
 			for (int i = 0; i < n; i++) {
-				// p = r + beta * p 
-				p[i] = r[i] + beta * p[i];
+				// p = z + beta * p 
+				p[i] = z[i] + beta * p[i];
 			}
 		}
 
 		// q = A * p
 		mkl_cspblas_dcsrgemv(&trans, &n, vals.data(), rows.data(), cols.data(), p.data(), q.data());
-		
+
 		//  dot product
 		double pq = 0;
 		for (int i = 0; i < n; i++) {
@@ -71,24 +85,28 @@ int LinearSolver_my_cg::Solve(const std::vector<double>& vals,
 
 		// alpha = rho / (p^T * q)
 		aplha = rho / pq;
-		
+
 		for (int i = 0; i < n; i++) {
 			// x = x + alpha * q
 			x[i] += aplha * p[i];
 			// r = r - alpha * q
 			r[i] -= aplha * q[i];
 		}
-		
+
 		double cur_res = 0;
 		for (int i = 0; i < n; i++) {
 			cur_res += r[i] * r[i];
 		}
 		cur_res = sqrt(cur_res);
-		double cur_rel = cur_res / b_norm;
+		cur_rel = cur_res / b_norm;
 		std::cout << cur_rel << std::endl;
 
 		is_convergenced = cur_rel < tolerance;
 		iter++;
+		if (std::isnan(cur_rel)) {
+			std::cout << "Nan detected" << std::endl;
+			break;
+		}
 	} while (!is_convergenced && iter < max_iter);
 
 	std::cout << "	iter_number: " << iter << std::endl;

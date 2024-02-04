@@ -8,18 +8,19 @@
 enum class SolverID {
 	ePARDISO = 10,
 	eAMGCL = 20,
-	eMY_CG = 30
+	eMY_CG = 30,
+	eMY_PCG = 35,
 };
 
 namespace polysolver {
 	std::unordered_map<std::string, SolverID> const table = {
 		{"PARDISO",SolverID::ePARDISO},
 		{"AMGCL", SolverID::eAMGCL},
-		{"MY_CG", SolverID::eMY_CG} };
+		{"MY_CG", SolverID::eMY_CG},
+		{"MY_PCG", SolverID::eMY_PCG} };
 }
 
-// Base solver clas
-// s 
+// Base solver class 
 class LinearSolver {
 public:
 	virtual int Solve(const std::vector<double>& vals,

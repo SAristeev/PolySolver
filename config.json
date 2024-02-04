@@ -1,9 +1,9 @@
 {
   "LinearProblem": {
-    "solvers": [ "PARDISO", "AMGCL", "MY_CG" ],
+    "solvers": [ "PARDISO", "AMGCL", "MY_CG", "MY_PCG" ],
     "path": "C:/WD/polysolver/sample",
     "cases": [
-      "!607x607 Neck"
+      "5x5"
     ],
     "results_file_name": "results",
 	
