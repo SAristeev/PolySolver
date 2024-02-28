@@ -1,6 +1,6 @@
 {
   "LinearProblem": {
-    "solvers": [ "PARDISO", "AMGCL", "MY_CG", "MY_PCG" ],
+    "solvers": [ "PARDISO", "AMGCL", "CUDA_CG", "CUDA_PCG" ],
     "path": "C:/WD/polysolver/sample",
     "cases": [
       "5x5"
