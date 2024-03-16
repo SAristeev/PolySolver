@@ -19,12 +19,13 @@ if not exist %CMAKE% (
 
 :: set environment variables
 set BOOST_ROOT=C:\LIBS64\Boost\boost_1_82_0
-set CASES_PATH=C:/WorkDirectory/Cases
-set AMGX_DIR=C:/LIBS64/AMGX
+set HYPRE_ROOT=C:\WD\hypre\src\hypre-win
+set AMGX_DIR=C:\WD\v2.4.0_mpi
 
 %CMAKE% -Ax64 -B build ^
 	-DPOLYSOLVER_TEST=OFF ^
 	-DPOLYSOLVER_USE_CUDA=ON ^
+	-DPOLYSOLVER_USE_HYPRE=ON ^
 	-DMKL_ARCH=intel64 ^
 	-DMKL_LINK=static ^
 	-DMKL_INTERFACE=lp64

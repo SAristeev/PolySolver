@@ -1,12 +1,12 @@
 {
   "LinearProblem": {
-    "solvers": [ "PARDISO", "AMGCL", "CUDA_CG", "CUDA_PCG" ],
-    "path": "C:/WD/polysolver/sample",
+    "solvers": [ "HYPRE", "PARDISO", "AMGX" ],
+    "path": "D:\\WorkDirectory\\Cases",
     "cases": [
-      "5x5"
+      "3031_iter"
     ],
     "results_file_name": "results",
-	
+
     "print_answer": false,
     "check_answer": true,
     "print_time": true,

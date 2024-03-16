@@ -16,6 +16,8 @@ enum class SolverID {
 	eMKL_PCG = 35,
 	eCUDA_CG = 40,
 	eCUDA_PCG = 45,
+	eHYPRE = 50,
+	eAMGX = 60,
 };
 
 namespace polysolver {
@@ -25,7 +27,9 @@ namespace polysolver {
 		{"MKL_CG", SolverID::eMKL_CG},
 		{"MKL_PCG", SolverID::eMKL_PCG},
 		{"CUDA_CG", SolverID::eCUDA_CG},
-		{"CUDA_PCG", SolverID::eCUDA_PCG} };
+		{"CUDA_PCG", SolverID::eCUDA_PCG},
+		{"HYPRE", SolverID::eHYPRE},
+		{"AMGX", SolverID::eAMGX} };
 }
 
 // Base solver class 

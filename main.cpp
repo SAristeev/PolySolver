@@ -1,5 +1,5 @@
 #include "PolySolver.hpp"
-
+#include <mpi.h>
 
 int main(int argc, char** argv)
 {
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     // all Derived solvers by ptr to Base Solver
     std::set<std::unique_ptr<LinearSolver>> solvers;
     CreateSolvers(settings, solvers);
-
+    MPI_Init(&argc, &argv);
     for (std::string case_name : settings["LinearProblem"]["cases"]) {
         
         std::vector<double> b;
@@ -63,8 +63,7 @@ int main(int argc, char** argv)
             std::cout << "resudial(vals, cols, rows, b, x)" << std::endl;
             std::cout << resudial(vals, cols, rows, b, x) << std::endl;
         }
-
-        
     }
+    MPI_Finalize();
     return 0;
 }
